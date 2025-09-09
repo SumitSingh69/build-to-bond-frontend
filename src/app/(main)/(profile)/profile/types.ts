@@ -1,4 +1,4 @@
-import { User } from '@/context/AuthContext'
+import { User } from '@/types/auth.types'
 
 // Re-export the User type for profile usage
 export type ProfileUser = User

@@ -1,6 +1,6 @@
 'use client'
 
-import React, { Suspense, useState } from 'react'
+import React, { Suspense, useState, useEffect } from 'react'
 import { Skeleton } from '@/components/ui/skeleton'
 import ClientOnly from '@/components/ClientOnly'
 import ProfileSidebar from './_components/ProfileSidebar'
@@ -8,8 +8,10 @@ import ProfileDetailsForm from './_components/ProfileDetailsForm'
 import NotificationsPanel from './_components/NotificationsPanel'
 import FloatingNotification from './_components/FloatingNotification'
 import EditProfileModal from './_components/EditProfileModal'
+import ProfileLoading from './loading'
 import { NotificationItem } from './types'
-import { useAuth, User } from '@/context/AuthContext'
+import { useAuth } from '@/context/AuthContext'
+import { User } from '@/types/auth.types'
 import { apiRequest } from '@/lib/api'
 import { toast } from 'sonner'
 
@@ -72,20 +74,26 @@ const mockNotifications: NotificationItem[] = [
 ]
 
 function ProfilePageContent() {
-  const { user, updateProfile: updateAuthProfile } = useAuth()
+  const { user, updateProfile: updateAuthProfile, loading } = useAuth()
   const [notifications, setNotifications] = useState<NotificationItem[]>(mockNotifications)
   const [isLoading, setIsLoading] = useState(false)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+  const [dataLoaded, setDataLoaded] = useState(false)
+
+  // Set data as loaded when user is available
+  useEffect(() => {
+    if (user && !loading) {
+      setDataLoaded(true)
+    }
+  }, [user, loading])
 
   const handleProfileSave = async (updatedData: Partial<User>) => {
     if (!user) return
 
     setIsLoading(true)
     try {
-      // Update payload with the changes
       const updatePayload: Partial<User> = {
-        ...updatedData, // Direct use of User fields
-        // Ensure we don't send computed fields to backend
+        ...updatedData,
         matches: undefined,
         likes: undefined,
         crushes: undefined,
@@ -98,7 +106,6 @@ function ProfilePageContent() {
       })
 
       if (response.success) {
-        // Update local auth context with the returned user data
         updateAuthProfile(response.data.user)
         
         toast.success('Profile updated successfully!')
@@ -157,16 +164,16 @@ function ProfilePageContent() {
     )
   }
 
-  // Show loading skeleton if profile data is not ready
-  if (!user) {
-    return <ProfilePageSkeleton />
+  // Show loading skeleton until user data is loaded
+  if (loading || !user || !dataLoaded) {
+    return <ProfileLoading />
   }
 
   return (
     <>
       <div className="grid grid-cols-1 lg:grid-cols-[288px_1fr_288px] gap-4">
         {/* Column 1: Profile Sidebar */}
-        <div className="order-2 lg:order-1">
+        <div className="order-2 lg:order-1 ">
           <ProfileSidebar
             profile={user}
             onEdit={handleProfileEdit}

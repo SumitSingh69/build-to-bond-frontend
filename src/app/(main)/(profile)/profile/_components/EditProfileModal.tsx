@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
-import { User } from '@/context/AuthContext'
+import { User } from '@/types/auth.types'
 import { Save, X } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -73,6 +73,21 @@ export default function EditProfileModal({
     setFormData(prev => ({ ...prev, [field]: value }))
   }
 
+  const handleBioChange = (value: string) => {
+    // Count characters
+    const charCount = value.length
+    
+    // Only allow up to 150 characters
+    if (charCount <= 150) {
+      setFormData((prev: Partial<User>) => ({ ...prev, bio: value }))
+    }
+  }
+
+  const getBioCharCount = () => {
+    const bio = formData.bio || ''
+    return bio.length
+  }
+
   const handleNestedInputChange = (parentField: keyof User, childField: string, value: string | number | boolean | undefined) => {
     setFormData(prev => ({
       ...prev,
@@ -85,6 +100,13 @@ export default function EditProfileModal({
 
   const handleSubmit = async () => {
     try {
+      // Validate bio character count before submission
+      const bioCharCount = getBioCharCount()
+      if (bioCharCount > 150) {
+        toast.error('Bio must be 150 characters or less')
+        return
+      }
+
       // Filter out empty/undefined values and validate specific fields
       const cleanedData = Object.fromEntries(
         Object.entries(formData).filter(([key, value]) => {
@@ -184,11 +206,19 @@ export default function EditProfileModal({
               <Textarea
                 id="bio"
                 value={formData.bio || ''}
-                onChange={(e) => handleInputChange('bio', e.target.value)}
+                onChange={(e) => handleBioChange(e.target.value)}
                 placeholder="Tell us about yourself..."
-                maxLength={500}
-                rows={3}
+                rows={4}
+                className={getBioCharCount() > 150 ? 'border-red-500' : ''}
               />
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500">
+                  Share a brief description about yourself
+                </span>
+                <span className={`${getBioCharCount() > 150 ? 'text-red-500' : getBioCharCount() > 130 ? 'text-yellow-500' : 'text-gray-500'}`}>
+                  {getBioCharCount()}/150 characters
+                </span>
+              </div>
             </div>
 
             <div className="space-y-2">
@@ -458,11 +488,11 @@ export default function EditProfileModal({
           <Button
             type="button"
             onClick={handleSubmit}
-            disabled={isLoading}
-            className="bg-green-600 hover:bg-green-700"
+            disabled={isLoading || getBioCharCount() > 150}
+            className={`${getBioCharCount() > 150 ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700'}`}
           >
             <Save className="w-4 h-4 mr-2" />
-            {isLoading ? 'Saving...' : 'Save Changes'}
+            {isLoading ? 'Saving...' : getBioCharCount() > 150 ? 'Bio too long' : 'Save Changes'}
           </Button>
         </DialogFooter>
       </DialogContent>

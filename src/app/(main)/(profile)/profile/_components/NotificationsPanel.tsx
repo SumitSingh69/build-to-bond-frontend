@@ -153,7 +153,7 @@ export default function NotificationsPanel({
       : "h-[calc(100vh-16rem)]";
 
     return (
-      <ScrollArea className={`${scrollHeight} pr-2`}>
+      <ScrollArea className={`${scrollHeight} pr-2 scrollbar-hide`}>
         {typeNotifications.map((notification) => (
           <NotificationCard key={notification.id} notification={notification} />
         ))}

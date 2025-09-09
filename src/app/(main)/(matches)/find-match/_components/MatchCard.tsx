@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { MatchCardProps } from "../types";
-
+import BioDisplay from "@/components/BioDisplay";
 
 
 const MatchCard: React.FC<MatchCardProps> = ({
@@ -90,9 +90,10 @@ const MatchCard: React.FC<MatchCardProps> = ({
           </div>
         )}
 
-        {user.bio && (
-          <p className="text-gray-700 text-sm mb-4 line-clamp-3">{user.bio}</p>
-        )}
+        <BioDisplay 
+          text={user.bio} 
+          className="text-gray-700 text-sm mb-4"
+        />
 
         {user.interests && user.interests.length > 0 && (
           <div className="mb-4">

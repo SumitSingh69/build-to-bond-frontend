@@ -3,7 +3,8 @@ import Image from 'next/image'
 import { Edit, Camera } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { User } from '@/context/AuthContext'
+import { User } from '@/types/auth.types'
+import BioDisplay from '@/components/BioDisplay'
 
 interface ProfileSidebarProps {
   profile: User | null
@@ -26,24 +27,8 @@ export default function ProfileSidebar({
       onProfilePictureChange(file)
     }
   }
-
-  // Show loading skeleton if profile is not available
-  if (!profile) {
-    return (
-      <Card className="w-full max-w-sm mx-auto lg:max-w-none lg:sticky lg:top-6 h-fit">
-        <CardContent className="p-4 lg:p-6">
-          <div className="text-center space-y-4">
-            <div className="w-24 h-24 lg:w-32 lg:h-32 mx-auto bg-gray-200 rounded-full animate-pulse" />
-            <div className="h-6 bg-gray-200 rounded animate-pulse" />
-            <div className="space-y-2">
-              <div className="h-4 bg-gray-200 rounded animate-pulse" />
-              <div className="h-4 bg-gray-200 rounded animate-pulse" />
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    )
-  }
+  
+  if (!profile) return null
 
   const getInitials = (name: string) => {
     return name.split(' ').map(n => n[0]).join('').toUpperCase()
@@ -54,7 +39,7 @@ export default function ProfileSidebar({
   }
 
   return (
-    <Card className="w-full lg:w-72 flex-shrink-0 lg:sticky lg:top-16 h-fit max-h-[calc(100vh-3rem)] overflow-y-auto">
+    <Card className="w-full lg:w-72 flex-shrink-0 lg:sticky lg:top-16 h-fit max-h-[calc(100vh-3rem)] overflow-y-auto scrollbar-hide">
       <CardContent className="p-4 lg:p-4">
         {/* Profile Picture Section */}
         <div className="flex flex-col items-center mb-4 lg:mb-6">
@@ -119,12 +104,12 @@ export default function ProfileSidebar({
 
           <div>
             <label className="text-xs lg:text-sm font-medium text-gray-400">Bio</label>
-            <p className="text-xs lg:text-sm text-gray-700 leading-relaxed">
-              {profile.bio || 'No bio added yet...'}
-            </p>
+            <BioDisplay 
+              text={profile.bio} 
+              className="text-xs lg:text-sm text-gray-700 leading-relaxed"
+            />
           </div>
 
-          {/* Stats */}
           <div className="pt-3 lg:pt-4 border-t border-gray-200">
             <div className="grid grid-cols-2 gap-3 lg:gap-4 text-center">
               <div className="bg-primary-50 rounded-lg p-2 lg:p-3">

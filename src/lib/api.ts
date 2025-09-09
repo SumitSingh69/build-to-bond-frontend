@@ -1,31 +1,53 @@
 import Cookies from "js-cookie";
-import config from "./config";
+import config from './config';
+import { User } from '@/types/auth.types';
 
 const API_BASE_URL = config.apiBaseUrl;
 
+// Global variables to prevent multiple simultaneous refresh attempts
+let isRefreshing = false;
+let refreshPromise: Promise<boolean> | null = null;
+
 const getAuthToken = (): string | null => {
   if (typeof window !== "undefined") {
-    return Cookies.get("authToken") || null;
+    return localStorage.getItem("authToken") || Cookies.get("authToken") || null;
   }
   return null;
 };
 
 const getRefreshToken = (): string | null => {
   if (typeof window !== "undefined") {
-    return Cookies.get("refreshToken") || null;
+    return localStorage.getItem("refreshToken") || Cookies.get("refreshToken") || null;
   }
   return null;
 };
 
-const setAuthTokens = (accessToken: string, refreshToken: string) => {
+const setAuthTokens = (accessToken: string, refreshToken: string, user?: User) => {
   if (typeof window !== "undefined") {
+    // Store in both localStorage and cookies for redundancy
+    localStorage.setItem("authToken", accessToken);
+    localStorage.setItem("refreshToken", refreshToken);
+    
     Cookies.set("authToken", accessToken, { expires: 1 }); // 1 day
     Cookies.set("refreshToken", refreshToken, { expires: 7 }); // 7 days
+    
+    // Update user data if provided
+    if (user) {
+      localStorage.setItem("user", JSON.stringify(user));
+      localStorage.setItem("userId", user._id);
+      Cookies.set("user", JSON.stringify(user), { expires: 7 });
+      Cookies.set("userId", user._id, { expires: 7 });
+    }
   }
 };
 
 const clearAuthTokens = () => {
   if (typeof window !== "undefined") {
+    localStorage.removeItem("authToken");
+    localStorage.removeItem("refreshToken");
+    localStorage.removeItem("user");
+    localStorage.removeItem("userId");
+    
     Cookies.remove("authToken");
     Cookies.remove("refreshToken");
     Cookies.remove("user");
@@ -33,36 +55,65 @@ const clearAuthTokens = () => {
   }
 };
 
+const isTokenExpired = (token: string): boolean => {
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    const currentTime = Math.floor(Date.now() / 1000);
+    // Check if token expires in the next 5 minutes (300 seconds)
+    return payload.exp < (currentTime + 300);
+  } catch {
+    return true;
+  }
+};
+
 const refreshAccessToken = async (): Promise<boolean> => {
+  // Prevent multiple simultaneous refresh attempts
+  if (isRefreshing) {
+    if (refreshPromise) {
+      return refreshPromise;
+    }
+  }
+
   const refreshToken = getRefreshToken();
   if (!refreshToken) return false;
 
-  try {
-    const response = await fetch(`${API_BASE_URL}/users/refresh-token`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ refreshToken }),
-    });
+  isRefreshing = true;
+  refreshPromise = (async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/users/refresh-token`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ refreshToken }),
+      });
 
-    if (response.ok) {
-      const data = await response.json();
-      if (data.success && data.data.accessToken && data.data.refreshToken) {
-        setAuthTokens(data.data.accessToken, data.data.refreshToken);
-        // Update user data if provided
-        if (data.data.user) {
-          Cookies.set("user", JSON.stringify(data.data.user));
-          Cookies.set("userId", data.data.user._id);
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.data.accessToken && data.data.refreshToken) {
+          setAuthTokens(data.data.accessToken, data.data.refreshToken, data.data.user);
+          
+          // Trigger a custom event to notify AuthContext of token refresh
+          if (typeof window !== "undefined") {
+            window.dispatchEvent(new CustomEvent('tokenRefreshed', { 
+              detail: { user: data.data.user } 
+            }));
+          }
+          
+          return true;
         }
-        return true;
       }
+    } catch (error) {
+      console.error("Token refresh failed:", error);
     }
-  } catch (error) {
-    console.error("Token refresh failed:", error);
-  }
 
-  return false;
+    return false;
+  })();
+
+  const result = await refreshPromise;
+  isRefreshing = false;
+  refreshPromise = null;
+  return result;
 };
 
 const createHeaders = (includeAuth: boolean = true): HeadersInit => {
@@ -88,6 +139,22 @@ export const apiRequest = async <T = unknown>(
 ): Promise<T> => {
   const url = `${API_BASE_URL}${endpoint}`;
 
+  // Check if token is expired before making request
+  if (includeAuth && typeof window !== "undefined") {
+    const token = getAuthToken();
+    if (token && isTokenExpired(token)) {
+      console.log("Token is about to expire, refreshing proactively...");
+      const refreshSuccess = await refreshAccessToken();
+      if (!refreshSuccess) {
+        clearAuthTokens();
+        if (window.location.pathname !== "/login") {
+          window.location.href = "/login";
+        }
+        throw new Error("Authentication failed - please login again");
+      }
+    }
+  }
+
   let response = await fetch(url, {
     ...options,
     headers: {
@@ -98,9 +165,11 @@ export const apiRequest = async <T = unknown>(
 
   // Handle 401 Unauthorized - try to refresh token
   if (response.status === 401 && includeAuth && retryOnUnauthorized && typeof window !== "undefined") {
+    console.log("Received 401, attempting token refresh...");
     const refreshSuccess = await refreshAccessToken();
     
     if (refreshSuccess) {
+      console.log("Token refresh successful, retrying original request...");
       // Retry the original request with new token
       response = await fetch(url, {
         ...options,
@@ -110,11 +179,13 @@ export const apiRequest = async <T = unknown>(
         },
       });
     } else {
+      console.log("Token refresh failed, redirecting to login...");
       // Refresh failed, clear auth and redirect
       clearAuthTokens();
       if (window.location.pathname !== "/login") {
         window.location.href = "/login";
       }
+      throw new Error("Session expired - please login again");
     }
   }
 
