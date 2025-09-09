@@ -55,8 +55,8 @@ const MessageInput: React.FC<MessageInputProps> = ({
 
   useEffect(() => {
     if (textareaRef.current) {
-      textareaRef.current.style.height = '40px'; // Set smaller minimum height
-      const scrollHeight = Math.min(textareaRef.current.scrollHeight, 70); // Smaller max 60px height
+      textareaRef.current.style.height = '40px'; 
+      const scrollHeight = Math.min(textareaRef.current.scrollHeight, 70); 
       textareaRef.current.style.height = `${scrollHeight}px`;
     }
   }, [message]);
@@ -106,10 +106,10 @@ const MessageInput: React.FC<MessageInputProps> = ({
       onMessageChange(message ? message + ' ' + transcript : transcript);
       setIsRecording(false);
       
-      // Call onVoiceRecord if provided
+      
       if (onVoiceRecord) {
         console.log('Voice recording completed:', transcript);
-        // Create a mock audio blob since we're using speech recognition
+        
         const mockBlob = new Blob([transcript], { type: 'text/plain' });
         onVoiceRecord(mockBlob);
       }
@@ -153,8 +153,8 @@ const MessageInput: React.FC<MessageInputProps> = ({
 
   return (
     <div className={`px-3 py-2 md:p-4 border-t border-gray-200 bg-white/95 backdrop-blur-sm ${className}`}>
-      <div className="flex items-center space-x-2 md:space-x-3 relative">{/* Adjusted spacing for mobile */}
-        {/* Attachment Menu */}
+      <div className="flex items-center space-x-2 md:space-x-3 relative">
+        
         <div className="relative" ref={attachMenuRef}>
           <Button
             variant="ghost"
@@ -168,7 +168,7 @@ const MessageInput: React.FC<MessageInputProps> = ({
             <Plus className="w-3.5 h-3.5 md:w-4 md:h-4" />
           </Button>
           
-          {/* Attachment Dropdown */}
+          
           {showAttachMenu && (
             <div className="absolute bottom-12 left-0 bg-white border border-gray-200 rounded-lg shadow-lg p-2 z-50 min-w-[160px]">
               <Button
@@ -193,7 +193,7 @@ const MessageInput: React.FC<MessageInputProps> = ({
           )}
         </div>
 
-        {/* Emoji Picker */}
+        
         <div className="relative" ref={emojiPickerRef}>
           <Button
             variant="ghost"
@@ -213,7 +213,7 @@ const MessageInput: React.FC<MessageInputProps> = ({
           )}
         </div>
         
-        {/* Message Input */}
+        
         <div className="flex-1 relative">
            <Textarea
             ref={textareaRef}
@@ -225,7 +225,7 @@ const MessageInput: React.FC<MessageInputProps> = ({
             className="w-full px-3 py-1.5 pr-8 md:pr-10 border border-gray-200 rounded-2xl bg-white text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 font-sans resize-none transition-all duration-200 shadow-sm text-sm min-h-[32px] max-h-[60px] overflow-y-auto"
           />
          
-          {/* Voice Record Button */}
+          
           <Button
             variant="ghost"
             size="sm"
@@ -240,7 +240,7 @@ const MessageInput: React.FC<MessageInputProps> = ({
           </Button>
         </div>
 
-        {/* Send Button */}
+        
         <Button
           onClick={handleSendMessage}
           disabled={!message.trim() || disabled}
@@ -252,7 +252,7 @@ const MessageInput: React.FC<MessageInputProps> = ({
         </Button>
       </div>
 
-      {/* Hidden File Inputs */}
+      
       <input
         type="file"
         ref={imageInputRef}

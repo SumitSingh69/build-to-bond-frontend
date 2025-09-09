@@ -30,8 +30,8 @@ export default function ProfileDetailsForm({ profile, onSave, isLoading = false 
   }
 
   const handleNestedInputChange = (
-    parentField: keyof User, 
-    childField: string, 
+    parentField: keyof User,
+    childField: string,
     value: string | number | boolean
   ) => {
     setFormData(prev => ({
@@ -53,15 +53,15 @@ export default function ProfileDetailsForm({ profile, onSave, isLoading = false 
 
   return (
     <div className="flex-1 space-y-6" suppressHydrationWarning>
-      {/* Basic Information Card */}
+
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
             <span>Basic Information</span>
             {isEditing && (
-              <Button 
-                onClick={handleSave} 
-                size="sm" 
+              <Button
+                onClick={handleSave}
+                size="sm"
                 className="bg-green-600 hover:bg-green-700"
                 disabled={isLoading}
               >
@@ -129,7 +129,7 @@ export default function ProfileDetailsForm({ profile, onSave, isLoading = false 
         </CardContent>
       </Card>
 
-      {/* Preferences Card */}
+
       <Card>
         <CardHeader>
           <CardTitle>Preferences</CardTitle>
@@ -194,7 +194,7 @@ export default function ProfileDetailsForm({ profile, onSave, isLoading = false 
         </CardContent>
       </Card>
 
-      {/* Social Links Card */}
+
       <Card>
         <CardHeader>
           <CardTitle>Social Links</CardTitle>
@@ -230,7 +230,7 @@ export default function ProfileDetailsForm({ profile, onSave, isLoading = false 
         </CardContent>
       </Card>
 
-      {/* Subscription Card */}
+
       <Card>
         <CardHeader>
           <CardTitle>Subscription</CardTitle>
@@ -250,7 +250,7 @@ export default function ProfileDetailsForm({ profile, onSave, isLoading = false 
         </CardContent>
       </Card>
 
-      {/* Stats Card */}
+
       <Card className="overflow-hidden">
         <CardHeader className="border-b border-primary-200">
           <CardTitle className="flex items-center space-x-2 text-primary-800">
@@ -260,7 +260,7 @@ export default function ProfileDetailsForm({ profile, onSave, isLoading = false 
         </CardHeader>
         <CardContent className="p-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {/* Crushes Stat */}
+
             <div className="group relative overflow-hidden rounded-xl bg-gradient-to-br from-red-50 to-pink-50 border border-red-100 hover:border-red-300 transition-all duration-300 hover:shadow-lg hover:shadow-red-100 hover:-translate-y-1">
               <div className="absolute inset-0 bg-gradient-to-br from-red-500/5 to-pink-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               <div className="relative p-4 text-center space-y-3">
@@ -273,8 +273,8 @@ export default function ProfileDetailsForm({ profile, onSave, isLoading = false 
                 </div>
               </div>
             </div>
-            
-            {/* Matches Stat */}
+
+
             <div className="group relative overflow-hidden rounded-xl bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 hover:border-blue-300 transition-all duration-300 hover:shadow-lg hover:shadow-blue-100 hover:-translate-y-1">
               <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-indigo-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               <div className="relative p-4 text-center space-y-3">
@@ -288,7 +288,7 @@ export default function ProfileDetailsForm({ profile, onSave, isLoading = false 
               </div>
             </div>
 
-            {/* Views Stat */}
+
             <div className="group relative overflow-hidden rounded-xl bg-gradient-to-br from-green-50 to-emerald-50 border border-green-100 hover:border-green-300 transition-all duration-300 hover:shadow-lg hover:shadow-green-100 hover:-translate-y-1">
               <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 to-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               <div className="relative p-4 text-center space-y-3">
@@ -302,7 +302,7 @@ export default function ProfileDetailsForm({ profile, onSave, isLoading = false 
               </div>
             </div>
 
-            {/* Completeness Stat */}
+
             <div className="group relative overflow-hidden rounded-xl bg-gradient-to-br from-purple-50 to-violet-50 border border-purple-100 hover:border-purple-300 transition-all duration-300 hover:shadow-lg hover:shadow-purple-100 hover:-translate-y-1">
               <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-violet-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               <div className="relative p-4 text-center space-y-3">
