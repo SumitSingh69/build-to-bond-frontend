@@ -5,10 +5,8 @@ import { MatchHeader, MatchFallback, MatchCard, MatchFilterSheet } from "./_comp
 import { UserDetailSheet } from "./_components/UserDetailSheet";
 import { useMatchFinder } from "@/hooks/useMatchFinder";
 import { Button } from "@/components/ui/button";
-import { MatchFilters } from "./types/filter.types";
-import { DEFAULT_FILTERS } from "./constants/filter.constants";
 
-const page = () => {
+const FindMatchPage = () => {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [isUserDetailOpen, setIsUserDetailOpen] = useState(false);
@@ -28,10 +26,6 @@ const page = () => {
 
   const handleFilterClick = () => {
     setIsFilterOpen(true);
-  };
-
-  const handleFiltersChange = (newFilters: MatchFilters) => {
-    // This will be handled by applyFilters
   };
 
   const handleApplyFilters = () => {
@@ -180,4 +174,4 @@ const page = () => {
   );
 };
 
-export default page;
+export default FindMatchPage;

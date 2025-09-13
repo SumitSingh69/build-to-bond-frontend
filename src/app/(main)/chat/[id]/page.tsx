@@ -3,8 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
-import { useSocket } from '@/context/SocketContext';
-import { useChatRoom, useRealtimeMessages, useTypingIndicator, useOnlineStatus } from '@/hooks/useChat';
+import { useSocket, MessageData } from '@/context/SocketContext';
+import { useChatRoom, useTypingIndicator, useOnlineStatus } from '@/hooks/useChat';
 import { useChatData } from '@/hooks/useChatData';
 import ChatHeader from '../_components/ChatHeader';
 import MessageList from '../_components/MessageList';
@@ -13,12 +13,10 @@ import ConnectionStatus from '@/components/ConnectionStatus';
 import { Message, ChatUser } from '../types';
 import { Loader2 } from 'lucide-react';
 
-interface ChatPageProps {}
-
-const ChatPage: React.FC<ChatPageProps> = () => {
+const ChatPage: React.FC = () => {
   const params = useParams();
   const { user } = useAuth();
-  const { sendMessage, isConnected, onNewMessage, joinRoom, leaveRoom } = useSocket();
+  const { isConnected, onNewMessage, joinRoom, leaveRoom } = useSocket();
   const { fetchRoomWithMessages, sendMessage: sendApiMessage, chats } = useChatData();
   
   // Local state
@@ -31,7 +29,6 @@ const ChatPage: React.FC<ChatPageProps> = () => {
   const roomId = params.id as string; // This is now the actual room ID from our API
 
   // Socket hooks
-  const { isInRoom } = useChatRoom(roomId);
   const { 
     typingUsers, 
     handleTyping, 
@@ -96,7 +93,7 @@ const ChatPage: React.FC<ChatPageProps> = () => {
 
     console.log('Setting up real-time message listener for room:', roomId);
 
-    const unsubscribe = onNewMessage((newMessageData: any) => {
+    const unsubscribe = onNewMessage((newMessageData: MessageData) => {
       console.log('Received new message via socket:', newMessageData);
       
       // Check if message belongs to current room
@@ -104,7 +101,7 @@ const ChatPage: React.FC<ChatPageProps> = () => {
         const newMessage: Message = {
           id: newMessageData._id || Date.now().toString(),
           text: newMessageData.message || '',
-          messageType: newMessageData.messageType || 'text',
+          messageType: newMessageData.messageType === 'audio' ? 'voice' : (newMessageData.messageType as 'text' | 'image'),
           senderId: newMessageData.sender,
           timestamp: new Date(newMessageData.createdAt || Date.now()),
           isOwn: newMessageData.sender === user._id,

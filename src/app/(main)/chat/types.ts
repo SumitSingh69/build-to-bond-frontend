@@ -29,6 +29,20 @@ export interface Message {
   };
 }
 
+export interface SocketMessageData {
+  _id: string;
+  roomId: string;
+  sender: string;
+  message: string;
+  messageType: 'text' | 'image' | 'voice' | 'video' | 'file';
+  createdAt: string;
+  seenStatus: boolean;
+  image?: {
+    url: string;
+    publicId: string;
+  };
+}
+
 export interface ChatUser {
   id: string;
   firstName: string;
