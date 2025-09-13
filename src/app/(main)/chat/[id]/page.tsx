@@ -1,77 +1,79 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { useParams } from 'next/navigation';
-import { useAuth } from '@/context/AuthContext';
-import { useSocket, MessageData } from '@/context/SocketContext';
-import { useChatRoom, useTypingIndicator, useOnlineStatus } from '@/hooks/useChat';
-import { useChatData } from '@/hooks/useChatData';
-import ChatHeader from '../_components/ChatHeader';
-import MessageList from '../_components/MessageList';
-import MessageInput from '../_components/MessageInput';
-import ConnectionStatus from '@/components/ConnectionStatus';
-import { Message, ChatUser } from '../types';
-import { Loader2 } from 'lucide-react';
+import React, { useState, useEffect } from "react";
+import { useParams } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
+import { useSocket, MessageData } from "@/context/SocketContext";
+import {
+  useTypingIndicator,
+  useOnlineStatus,
+} from "@/hooks/useChat";
+import { useChatData } from "@/hooks/useChatData";
+import ChatHeader from "../_components/ChatHeader";
+import MessageList from "../_components/MessageList";
+import MessageInput from "../_components/MessageInput";
+import ConnectionStatus from "@/components/ConnectionStatus";
+import { Message, ChatUser } from "../types";
+import { Loader2 } from "lucide-react";
 
 const ChatPage: React.FC = () => {
   const params = useParams();
   const { user } = useAuth();
   const { isConnected, onNewMessage, joinRoom, leaveRoom } = useSocket();
-  const { fetchRoomWithMessages, sendMessage: sendApiMessage, chats } = useChatData();
-  
-  // Local state
-  const [message, setMessage] = useState('');
+  const {
+    fetchRoomWithMessages,
+    sendMessage: sendApiMessage,
+    chats,
+  } = useChatData();
+
+  const [message, setMessage] = useState("");
   const [chatUser, setChatUser] = useState<ChatUser | null>(null);
   const [showMobileBack, setShowMobileBack] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
-  
-  const roomId = params.id as string; // This is now the actual room ID from our API
 
-  // Socket hooks
-  const { 
-    typingUsers, 
-    handleTyping, 
-    handleStopTyping 
-  } = useTypingIndicator(roomId || '');
+  const roomId = params.id as string;
+
+  const { typingUsers, handleTyping, handleStopTyping } = useTypingIndicator(
+    roomId || ""
+  );
   const { onlineUsers } = useOnlineStatus();
 
-  // Load messages and chat user info
   useEffect(() => {
     const loadChatData = async () => {
       if (!roomId || !user) return;
-      
+
       setLoading(true);
       try {
-        // Join the socket room
         if (joinRoom) {
           joinRoom(roomId);
         }
 
-        // Load messages and user info for this room
-        const { messages: roomMessages, user: roomUser } = await fetchRoomWithMessages(roomId);
+        const { messages: roomMessages, user: roomUser } =
+          await fetchRoomWithMessages(roomId);
         setMessages(roomMessages);
-        
+
         if (roomUser) {
           setChatUser({
             ...roomUser,
-            isOnline: onlineUsers.includes(roomUser.id) // Set online status from socket data
+            isOnline: onlineUsers.includes(roomUser.id),
           });
         } else {
-          // Fallback: try to find the user from existing chats
-          const currentChat = chats.find(chat => chat.roomId === roomId);
+          const currentChat = chats.find((chat) => chat.roomId === roomId);
           if (currentChat) {
-            const otherUser = currentChat.participants.find(p => p.id !== user._id);
+            const otherUser = currentChat.participants.find(
+              (p) => p.id !== user._id
+            );
             if (otherUser) {
               setChatUser({
                 ...otherUser,
-                isOnline: onlineUsers.includes(otherUser.id) // Set online status from socket data
+                isOnline: onlineUsers.includes(otherUser.id),
               });
             }
           }
         }
       } catch (error) {
-        console.error('Error loading chat data:', error);
+        console.error("Error loading chat data:", error);
       } finally {
         setLoading(false);
       }
@@ -79,7 +81,6 @@ const ChatPage: React.FC = () => {
 
     loadChatData();
 
-    // Cleanup: leave room when component unmounts or roomId changes
     return () => {
       if (roomId && leaveRoom) {
         leaveRoom(roomId);
@@ -87,66 +88,68 @@ const ChatPage: React.FC = () => {
     };
   }, [roomId, user, fetchRoomWithMessages, chats, joinRoom, leaveRoom]);
 
-  // Real-time message listening
   useEffect(() => {
     if (!roomId || !user) return;
 
-    console.log('Setting up real-time message listener for room:', roomId);
+    console.log("Setting up real-time message listener for room:", roomId);
 
     const unsubscribe = onNewMessage((newMessageData: MessageData) => {
-      console.log('Received new message via socket:', newMessageData);
-      
-      // Check if message belongs to current room
+      console.log("Received new message via socket:", newMessageData);
+
       if (newMessageData.roomId === roomId) {
         const newMessage: Message = {
           id: newMessageData._id || Date.now().toString(),
-          text: newMessageData.message || '',
-          messageType: newMessageData.messageType === 'audio' ? 'voice' : (newMessageData.messageType as 'text' | 'image'),
+          text: newMessageData.message || "",
+          messageType:
+            newMessageData.messageType === "audio"
+              ? "voice"
+              : (newMessageData.messageType as "text" | "image"),
           senderId: newMessageData.sender,
           timestamp: new Date(newMessageData.createdAt || Date.now()),
           isOwn: newMessageData.sender === user._id,
-          status: 'delivered',
+          status: "delivered",
           mediaUrl: newMessageData.image?.url,
         };
 
-        setMessages(prev => {
-          // Check if message already exists to prevent duplicates
-          const exists = prev.some(msg => msg.id === newMessage.id);
+        setMessages((prev) => {
+          const exists = prev.some((msg) => msg.id === newMessage.id);
           if (exists) {
-            console.log('Message already exists, skipping duplicate');
+            console.log("Message already exists, skipping duplicate");
             return prev;
           }
-          console.log('Adding new message to state');
+          console.log("Adding new message to state");
           return [...prev, newMessage];
         });
       }
     });
 
     return () => {
-      console.log('Cleaning up real-time message listener');
+      console.log("Cleaning up real-time message listener");
       unsubscribe();
     };
   }, [roomId, user, onNewMessage]);
 
-  // Update online status when online users change
   useEffect(() => {
     if (chatUser) {
-      setChatUser(prev => prev ? {
-        ...prev,
-        isOnline: onlineUsers.includes(prev.id)
-      } : null);
+      setChatUser((prev) =>
+        prev
+          ? {
+              ...prev,
+              isOnline: onlineUsers.includes(prev.id),
+            }
+          : null
+      );
     }
   }, [onlineUsers, chatUser?.id]);
 
-  // Check if mobile view
   useEffect(() => {
     const checkMobile = () => {
       setShowMobileBack(window.innerWidth < 768);
     };
-    
+
     checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
   const handleSendMessage = async () => {
@@ -155,42 +158,35 @@ const ChatPage: React.FC = () => {
     }
 
     const messageText = message.trim();
-    
-    // Clear input immediately
-    setMessage('');
-    
-    // Stop typing
+
+    setMessage("");
+
     handleStopTyping();
 
     try {
-      // Send message using our API - backend will handle socket emission
-      const success = await sendApiMessage(roomId, messageText, 'text');
-      
+      const success = await sendApiMessage(roomId, messageText, "text");
+
       if (!success) {
-        // If API call failed, show error and restore message
         setMessage(messageText);
-        console.error('Failed to send message via API');
+        console.error("Failed to send message via API");
       }
     } catch (error) {
-      console.error('Error sending message:', error);
-      // Restore message on error
+      console.error("Error sending message:", error);
+
       setMessage(messageText);
     }
   };
 
   const handleVoiceRecord = async (audioBlob: Blob) => {
-    console.log('Voice recording received:', audioBlob);
-    // TODO: Implement voice message sending
+    console.log("Voice recording received:", audioBlob);
   };
 
   const handleImageSelect = async (file: File) => {
-    console.log('Image selected:', file);
-    // TODO: Implement image message sending
+    console.log("Image selected:", file);
   };
 
   const handleFileSelect = async (file: File) => {
-    console.log('File selected:', file);
-    // TODO: Implement file message sending
+    console.log("File selected:", file);
   };
 
   const handleBack = () => {
@@ -210,7 +206,6 @@ const ChatPage: React.FC = () => {
 
   return (
     <div className="flex flex-col h-screen bg-gray-50">
-      
       {!isConnected && (
         <div className="bg-yellow-100 border-b border-yellow-200 px-4 py-2">
           <ConnectionStatus />
@@ -218,18 +213,20 @@ const ChatPage: React.FC = () => {
       )}
 
       <ChatHeader
-        user={chatUser || {
-          id: 'unknown',
-          firstName: 'Loading',
-          lastName: '...',
-          isOnline: false
-        }}
+        user={
+          chatUser || {
+            id: "unknown",
+            firstName: "Loading",
+            lastName: "...",
+            isOnline: false,
+          }
+        }
         onBack={handleBack}
         showBackButton={showMobileBack}
         isConnected={isConnected}
-        typingUsers={typingUsers.filter(userId => userId !== user._id)}
-        onVideoCall={() => console.log('Video call')}
-        onMoreOptions={() => console.log('More options')}
+        typingUsers={typingUsers.filter((userId) => userId !== user._id)}
+        onVideoCall={() => console.log("Video call")}
+        onMoreOptions={() => console.log("More options")}
       />
 
       <div className="flex-1 overflow-hidden">
@@ -251,11 +248,7 @@ const ChatPage: React.FC = () => {
           onStartTyping={handleTyping}
           onStopTyping={handleStopTyping}
           disabled={!isConnected}
-          placeholder={
-            isConnected 
-              ? "Type a message..." 
-              : "Connecting..."
-          }
+          placeholder={isConnected ? "Type a message..." : "Connecting..."}
         />
       </div>
     </div>
