@@ -1,4 +1,19 @@
-# Soulara - Dating App Frontend
+# Soulara - Dat## 📋 Table of Contents
+
+- [🌟 Overview](#-overview)
+- [🏗️ System Architecture](#️-system-architecture)
+- [🛠️ Technology Stack](#️-technology-stack)
+- [📁 Project Structure](#-project-structure)
+- [✨ Features](#-features)
+- [🚀 Getting Started](#-getting-started)
+- [💻 Development](#-development)
+- [🚀 Deployment](#-deployment-1)
+- [🔌 API Integration](#-api-integration)
+- [⚡ Performance & Optimization](#-performance--optimization)
+- [🧪 Testing](#-testing)
+- [🤝 Contributing](#-contributing)
+- [📄 License](#-license)
+- [🙋‍♂️ Support](#️-support)ontend
 
 <div align="center">
   <img src="public/assets/hero/hero-01.png" alt="Soulara Logo" width="200"/>
@@ -13,21 +28,16 @@
   [Live Demo](https://soulara.app) • [API Documentation](../backend/README.md) • [Contributing](#contributing)
 </div>
 
-## 📖 Table of Contents
+## � Table of Contents
 
-- [Overview](#overview)
-- [System Architecture](#system-architecture)
-- [Technology Stack](#technology-stack)
-- [Project Structure](#project-structure)
-- [Features](#features)
-- [Getting Started](#getting-started)
-- [Development](#development)
-- [Deployment](#deployment)
-- [API Integration](#api-integration)
-- [Performance & Optimization](#performance--optimization)
-- [Testing](#testing)
-- [Contributing](#contributing)
-- [License](#license)
+- [✨ Features](#-features)
+- [🛠️ Tech Stack](#️-tech-stack)
+- [🏗️ System Architecture](#️-system-architecture)
+- [🚀 Getting Started](#-getting-started)
+- [🔌 API Integration](#-api-integration)
+- [🌐 Deployment](#-deployment)
+- [🤝 Contributing](#-contributing)
+- [📄 License](#-license)
 
 ## 🌟 Overview
 

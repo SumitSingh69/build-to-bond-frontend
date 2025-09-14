@@ -4,13 +4,13 @@ Welcome to the Soulara frontend project! This guide will help you get started wi
 
 ## 📋 Table of Contents
 
-- [Getting Started](#getting-started)
-- [Development Setup](#development-setup)
-- [Code Standards](#code-standards)
-- [Commit Guidelines](#commit-guidelines)
-- [Pull Request Process](#pull-request-process)
-- [Testing Guidelines](#testing-guidelines)
-- [Documentation Standards](#documentation-standards)
+- [🚀 Getting Started](#-getting-started)
+- [💻 Development Setup](#-development-setup)
+- [📏 Code Standards](#-code-standards)
+- [📝 Commit Guidelines](#-commit-guidelines)
+- [🔄 Pull Request Process](#-pull-request-process)
+- [🧪 Testing Guidelines](#-testing-guidelines)
+- [📚 Documentation Standards](#-documentation-standards)
 
 ## 🚀 Getting Started
 

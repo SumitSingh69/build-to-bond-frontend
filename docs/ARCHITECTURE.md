@@ -1,10 +1,23 @@
 # System Architecture Documentation
 
-## Overview
+## 📋 Table of Contents
+
+- [🔍 Overview](#-overview)
+- [🏗️ Architecture Principles](#️-architecture-principles)
+- [🧩 System Components](#-system-components)
+- [⚙️ Core Modules](#️-core-modules)
+- [🎨 Design Patterns](#-design-patterns)
+- [⚡ Performance Strategies](#-performance-strategies)
+- [🔒 Security Considerations](#-security-considerations)
+- [📊 Monitoring & Analytics](#-monitoring--analytics)
+- [🚀 Deployment Architecture](#-deployment-architecture)
+- [🔮 Future Considerations](#-future-considerations)
+
+## 🔍 Overview
 
 This document provides a comprehensive overview of the Soulara frontend system architecture, including design patterns, data flow, and technical decisions.
 
-## Architecture Principles
+## 🏗️ Architecture Principles
 
 ### 1. Component-Driven Development
 - **Atomic Design**: Components organized in atoms, molecules, organisms
@@ -21,7 +34,7 @@ This document provides a comprehensive overview of the Soulara frontend system a
 - **Lazy loading**: On-demand resource loading
 - **Caching strategies**: Multiple levels of caching
 
-## System Components
+## 🧩 System Components
 
 ### Frontend Layer
 
@@ -104,7 +117,7 @@ graph LR
     B --> C
 ```
 
-## Core Modules
+## ⚙️ Core Modules
 
 ### 1. Authentication Module
 
@@ -203,7 +216,7 @@ interface MatchingModule {
 - Swipe gesture interface
 - Real-time match updates
 
-## Design Patterns
+## 🎨 Design Patterns
 
 ### 1. Provider Pattern
 Used for global state management and dependency injection.
@@ -264,7 +277,7 @@ Modal.Body = ({ children }) => <div className="modal-body">{children}</div>;
 Modal.Footer = ({ children }) => <div className="modal-footer">{children}</div>;
 ```
 
-## Performance Strategies
+## ⚡ Performance Strategies
 
 ### 1. Code Splitting
 
@@ -311,7 +324,7 @@ const VirtualizedList = ({ items }) => {
 };
 ```
 
-## Security Considerations
+## 🔒 Security Considerations
 
 ### 1. Authentication Security
 - JWT tokens stored in httpOnly cookies
@@ -328,7 +341,7 @@ const VirtualizedList = ({ items }) => {
 - Rate limiting on API calls
 - HTTPS enforcement
 
-## Monitoring & Analytics
+## 📊 Monitoring & Analytics
 
 ### 1. Performance Monitoring
 
@@ -373,7 +386,7 @@ const trackUserAction = (action: string, metadata?: object) => {
 };
 ```
 
-## Deployment Architecture
+## 🚀 Deployment Architecture
 
 ### 1. Build Pipeline
 
@@ -422,7 +435,7 @@ interface EnvironmentConfig {
 }
 ```
 
-## Future Considerations
+## 🔮 Future Considerations
 
 ### 1. Scalability
 - Micro-frontend architecture consideration

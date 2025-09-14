@@ -4,14 +4,14 @@ This guide covers deployment strategies and configurations for the Soulara front
 
 ## 📋 Table of Contents
 
-- [Overview](#overview)
-- [Environment Setup](#environment-setup)
-- [Vercel Deployment](#vercel-deployment)
-- [Alternative Platforms](#alternative-platforms)
-- [CI/CD Pipeline](#cicd-pipeline)
-- [Performance Optimization](#performance-optimization)
-- [Monitoring & Analytics](#monitoring--analytics)
-- [Troubleshooting](#troubleshooting)
+- [🌐 Overview](#-overview)
+- [🔧 Environment Setup](#-environment-setup)
+- [🚀 Vercel Deployment](#-vercel-deployment)
+- [🔄 Alternative Platforms](#-alternative-platforms)
+- [⚙️ CI/CD Pipeline](#️-cicd-pipeline)
+- [🚄 Performance Optimization](#-performance-optimization)
+- [📊 Monitoring & Analytics](#-monitoring--analytics)
+- [🐛 Troubleshooting](#-troubleshooting)
 
 ## 🌐 Overview
 
