@@ -6,10 +6,10 @@ import { Button } from '@/components/ui/button'
 import { useConnectionStatus } from '@/hooks/useChat'
 
 export const ConnectionStatus: React.FC = () => {
-  const { connectionState, isConnected, reconnect } = useConnectionStatus()
+  const { connectionState, reconnect } = useConnectionStatus()
 
   if (connectionState === 'connected') {
-    return null // Don't show anything when connected
+    return null 
   }
 
   const getStatusConfig = () => {

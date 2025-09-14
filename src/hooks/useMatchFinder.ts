@@ -1,12 +1,26 @@
-import { useState, useEffect } from 'react';
-import { apiRequest } from '@/lib/api';
-import { MatchUser } from '../app/(main)/(matches)/find-match/types';
-import { MatchFilters } from '../app/(main)/(matches)/find-match/types/filter.types';
+import { useState, useEffect, useCallback } from "react";
+import { apiRequest } from "@/lib/api";
+import { MatchUser } from "../app/(main)/(matches)/find-match/types";
+import { MatchFilters } from "../app/(main)/(matches)/find-match/types/filter.types";
+
+interface BackendUser {
+  _id: string;
+  firstName: string;
+  lastName: string;
+  dob?: string;
+  profilePicture?: string;
+  avatar?: string;
+  bio?: string;
+  location?: { city?: string; country?: string };
+  occupation?: string;
+  education?: string;
+  interests?: string[];
+}
 
 interface FetchUsersResponse {
   success: boolean;
   message: string;
-  data: any[];
+  data: BackendUser[];
   page: number;
   limit: number;
   totalPages: number;
@@ -35,15 +49,18 @@ export const useMatchFinder = () => {
     const today = new Date();
     let age = today.getFullYear() - birthDate.getFullYear();
     const monthDiff = today.getMonth() - birthDate.getMonth();
-    
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+
+    if (
+      monthDiff < 0 ||
+      (monthDiff === 0 && today.getDate() < birthDate.getDate())
+    ) {
       age--;
     }
-    
+
     return age;
   };
 
-  const transformBackendUser = (backendUser: any): MatchUser => {
+  const transformBackendUser = useCallback((backendUser: BackendUser): MatchUser => {
     return {
       _id: backendUser._id,
       firstName: backendUser.firstName,
@@ -58,138 +75,151 @@ export const useMatchFinder = () => {
       occupation: backendUser.occupation,
       education: backendUser.education,
       interests: backendUser.interests || [],
-      // These would come from a matching algorithm in a real app
-      compatibility: Math.floor(Math.random() * 30) + 70, // 70-99%
-      distance: Math.floor(Math.random() * 50) + 1, // 1-50 km
-    };
-  };
 
-  const buildQueryString = (filters: MatchFilters, page: number, limit: number): string => {
+      compatibility: Math.floor(Math.random() * 30) + 70,
+      distance: Math.floor(Math.random() * 50) + 1,
+    };
+  }, []);
+
+  const buildQueryString = (
+    filters: MatchFilters,
+    page: number,
+    limit: number
+  ): string => {
     const params = new URLSearchParams({
       page: page.toString(),
       limit: limit.toString(),
     });
 
-    // Add filters to query params
     if (filters.ageRange) {
-      params.append('ageMin', filters.ageRange.min.toString());
-      params.append('ageMax', filters.ageRange.max.toString());
+      params.append("ageMin", filters.ageRange.min.toString());
+      params.append("ageMax", filters.ageRange.max.toString());
     }
 
     if (filters.gender) {
-      params.append('gender', filters.gender);
+      params.append("gender", filters.gender);
     }
 
     if (filters.genderPreference) {
-      params.append('genderPreference', filters.genderPreference);
+      params.append("genderPreference", filters.genderPreference);
     }
 
     if (filters.lookingFor) {
-      params.append('lookingFor', filters.lookingFor);
+      params.append("lookingFor", filters.lookingFor);
     }
 
     if (filters.heightRange) {
-      params.append('heightMin', filters.heightRange.min.toString());
-      params.append('heightMax', filters.heightRange.max.toString());
+      params.append("heightMin", filters.heightRange.min.toString());
+      params.append("heightMax", filters.heightRange.max.toString());
     }
 
     if (filters.education && filters.education.length > 0) {
-      params.append('education', filters.education.join(','));
+      params.append("education", filters.education.join(","));
     }
 
     if (filters.smoking && filters.smoking.length > 0) {
-      params.append('smoking', filters.smoking.join(','));
+      params.append("smoking", filters.smoking.join(","));
     }
 
     if (filters.drinking && filters.drinking.length > 0) {
-      params.append('drinking', filters.drinking.join(','));
+      params.append("drinking", filters.drinking.join(","));
     }
 
     if (filters.children && filters.children.length > 0) {
-      params.append('children', filters.children.join(','));
+      params.append("children", filters.children.join(","));
     }
 
     if (filters.relationshipStatus && filters.relationshipStatus.length > 0) {
-      params.append('relationshipStatus', filters.relationshipStatus.join(','));
+      params.append("relationshipStatus", filters.relationshipStatus.join(","));
     }
 
     if (filters.interests && filters.interests.length > 0) {
-      params.append('interests', filters.interests.join(','));
+      params.append("interests", filters.interests.join(","));
     }
 
     if (filters.religion) {
-      params.append('religion', filters.religion);
+      params.append("religion", filters.religion);
     }
 
     if (filters.languages && filters.languages.length > 0) {
-      params.append('languages', filters.languages.join(','));
+      params.append("languages", filters.languages.join(","));
     }
 
     if (filters.isVerified !== undefined) {
-      params.append('isVerified', filters.isVerified.toString());
+      params.append("isVerified", filters.isVerified.toString());
     }
 
     if (filters.lastActiveWithin) {
-      params.append('lastActiveWithin', filters.lastActiveWithin.toString());
+      params.append("lastActiveWithin", filters.lastActiveWithin.toString());
     }
 
     if (filters.minProfileCompleteness !== undefined) {
-      params.append('minProfileCompleteness', filters.minProfileCompleteness.toString());
+      params.append(
+        "minProfileCompleteness",
+        filters.minProfileCompleteness.toString()
+      );
     }
 
     if (filters.location) {
       if (filters.location.city) {
-        params.append('city', filters.location.city);
+        params.append("city", filters.location.city);
       }
       if (filters.location.country) {
-        params.append('country', filters.location.country);
+        params.append("country", filters.location.country);
       }
       if (filters.location.radius) {
-        params.append('radius', filters.location.radius.toString());
+        params.append("radius", filters.location.radius.toString());
       }
     }
 
     return params.toString();
   };
 
-  const fetchMatches = async (page: number = 1, limit: number = 10, currentFilters: MatchFilters = filters) => {
-    try {
-      setLoading(true);
-      setError(null);
+  const fetchMatches = useCallback(
+    async (
+      page: number = 1,
+      limit: number = 10,
+      currentFilters: MatchFilters = filters
+    ) => {
+      try {
+        setLoading(true);
+        setError(null);
 
-      const queryString = buildQueryString(currentFilters, page, limit);
-      const response = await apiRequest<FetchUsersResponse>(
-        `/users/all?${queryString}`,
-        {
-          method: 'GET',
+        const queryString = buildQueryString(currentFilters, page, limit);
+        const response = await apiRequest<FetchUsersResponse>(
+          `/users/all?${queryString}`,
+          {
+            method: "GET",
+          }
+        );
+
+        if (response.success) {
+          const transformedUsers = response.data.map(transformBackendUser);
+
+          if (page === 1) {
+            setMatches(transformedUsers);
+          } else {
+            setMatches((prev) => [...prev, ...transformedUsers]);
+          }
+
+          setPagination({
+            page: response.page,
+            limit: response.limit,
+            totalPages: response.totalPages,
+            hasNextPage: response.hasNextPage,
+            hasPreviousPage: response.hasPreviousPage,
+          });
         }
-      );
-
-      if (response.success) {
-        const transformedUsers = response.data.map(transformBackendUser);
-        
-        // For pagination, replace or append based on page
-        if (page === 1) {
-          setMatches(transformedUsers);
-        } else {
-          setMatches(prev => [...prev, ...transformedUsers]);
-        }
-
-        setPagination({
-          page: response.page,
-          limit: response.limit,
-          totalPages: response.totalPages,
-          hasNextPage: response.hasNextPage,
-          hasPreviousPage: response.hasPreviousPage,
-        });
+      } catch (err: unknown) {
+        const e = err as { message?: string };
+        setError(e?.message || "Failed to fetch matches");
+        console.error("Error fetching matches:", err);
+      } finally {
+        setLoading(false);
       }
-    } catch (err: any) {
-      setError(err.message || 'Failed to fetch matches');
-      console.error('Error fetching matches:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
+    },
+    [filters, transformBackendUser]
+  );
 
   const loadMore = () => {
     if (pagination.hasNextPage && !loading) {
@@ -214,38 +244,25 @@ export const useMatchFinder = () => {
 
   const handleLike = async (userId: string) => {
     try {
-      // TODO: Implement like API call
-      console.log('Liked user:', userId);
-      
-      // Remove user from matches locally for now
-      setMatches(prev => prev.filter(match => match._id !== userId));
-      
-      // Here you would make an API call to record the like
-      // await api.post('/matches/like', { userId });
+
+      setMatches((prev) => prev.filter((match) => match._id !== userId));
     } catch (err) {
-      console.error('Error liking user:', err);
+      console.error("Error liking user:", err);
     }
   };
 
   const handlePass = async (userId: string) => {
     try {
-      // TODO: Implement pass API call
-      console.log('Passed user:', userId);
-      
-      // Remove user from matches locally for now
-      setMatches(prev => prev.filter(match => match._id !== userId));
-      
-      // Here you would make an API call to record the pass
-      // await api.post('/matches/pass', { userId });
+
+      setMatches((prev) => prev.filter((match) => match._id !== userId));
     } catch (err) {
-      console.error('Error passing user:', err);
+      console.error("Error passing user:", err);
     }
   };
 
-  // Auto-fetch on mount
   useEffect(() => {
     fetchMatches();
-  }, []);
+  }, [fetchMatches]);
 
   return {
     matches,

@@ -24,7 +24,7 @@ export const useChatRoom = (roomId: string | null) => {
         setIsInRoom(false)
       }
     }
-  }, [roomId, isConnected, joinRoom, leaveRoom])
+  }, [roomId, isConnected, joinRoom, leaveRoom, isInRoom])
 
   return { isInRoom }
 }

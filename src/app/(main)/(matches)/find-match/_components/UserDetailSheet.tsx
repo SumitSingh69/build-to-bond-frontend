@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Sheet,
   SheetContent,
@@ -17,7 +17,6 @@ import {
   GraduationCap,
   Heart,
   MessageCircle,
-  Calendar,
   Users,
   Star,
   X,
@@ -39,8 +38,8 @@ interface UserDetail {
   _id: string;
   firstName: string;
   lastName: string;
-  dob?: string; // Date of birth from API
-  age?: number; // Calculated age
+  dob?: string;
+  age?: number;
   profilePicture?: string;
   avatar?: string;
   bio?: string;
@@ -54,7 +53,7 @@ interface UserDetail {
   interests?: string[];
   compatibility?: number;
   distance?: number;
-  height?: number; // API returns number, not string
+  height?: number;
   relationshipGoals?: string;
   lookingFor?: string;
   smoking?: string;
@@ -94,13 +93,7 @@ export const UserDetailSheet: React.FC<UserDetailSheetProps> = ({
   const router = useRouter();
   const { createOrGetChatRoom } = useChatData();
 
-  useEffect(() => {
-    if (userId && isOpen) {
-      fetchUserDetails();
-    }
-  }, [userId, isOpen]);
-
-  const fetchUserDetails = async () => {
+  const fetchUserDetails = useCallback(async () => {
     if (!userId) return;
 
     setLoading(true);
@@ -126,27 +119,26 @@ export const UserDetailSheet: React.FC<UserDetailSheetProps> = ({
     } finally {
       setLoading(false);
     }
-  };
+  }, [userId]);
+
+  useEffect(() => {
+    if (userId && isOpen) {
+      fetchUserDetails();
+    }
+  }, [userId, isOpen, fetchUserDetails]);
 
   const handleStartChat = async () => {
     if (!user) return;
-    
+
     setStartingChat(true);
     try {
-      console.log('Starting chat with user:', user._id);
-      
-      // Create or get existing chat room
       const roomId = await createOrGetChatRoom(user._id);
-      
-      console.log('Received room ID:', roomId);
-      
+
       if (roomId) {
-        console.log('Navigating to chat room:', roomId);
-        // Navigate to the chat room
         router.push(`/chat/${roomId}`);
         onClose();
       } else {
-        console.error('No room ID received');
+        console.error("No room ID received");
         toast.error("Failed to start chat. Please try again.");
       }
     } catch (error) {
@@ -171,17 +163,19 @@ export const UserDetailSheet: React.FC<UserDetailSheetProps> = ({
     }
   };
 
-  // Calculate age from date of birth
   const calculateAge = (dob: string): number => {
     const birthDate = new Date(dob);
     const today = new Date();
     let age = today.getFullYear() - birthDate.getFullYear();
     const monthDiff = today.getMonth() - birthDate.getMonth();
-    
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+
+    if (
+      monthDiff < 0 ||
+      (monthDiff === 0 && today.getDate() < birthDate.getDate())
+    ) {
       age--;
     }
-    
+
     return age;
   };
 
@@ -254,7 +248,8 @@ export const UserDetailSheet: React.FC<UserDetailSheetProps> = ({
                     {user.firstName} {user.lastName}
                   </h1>
                   <p className="text-lg opacity-90 mb-2">
-                    {user.dob ? calculateAge(user.dob) : user.age || 'N/A'} years old
+                    {user.dob ? calculateAge(user.dob) : user.age || "N/A"}{" "}
+                    years old
                   </p>
                   {displayLocation && (
                     <div className="flex items-center text-sm opacity-80">
@@ -314,7 +309,9 @@ export const UserDetailSheet: React.FC<UserDetailSheetProps> = ({
                 {user.height && (
                   <div className="flex items-center space-x-2">
                     <Users className="w-4 h-4 text-gray-500" />
-                    <span className="text-sm text-gray-600">{user.height} cm</span>
+                    <span className="text-sm text-gray-600">
+                      {user.height} cm
+                    </span>
                   </div>
                 )}
                 {user.distance && (
@@ -385,7 +382,10 @@ export const UserDetailSheet: React.FC<UserDetailSheetProps> = ({
               )} */}
 
               {/* Lifestyle */}
-              {(user.smoking || user.drinking || user.relationshipStatus || user.children) && (
+              {(user.smoking ||
+                user.drinking ||
+                user.relationshipStatus ||
+                user.children) && (
                 <div>
                   <h3 className="text-lg font-semibold mb-3 text-gray-800">
                     Lifestyle
@@ -419,7 +419,7 @@ export const UserDetailSheet: React.FC<UserDetailSheetProps> = ({
                       <div className="text-sm">
                         <span className="text-gray-500">Children:</span>
                         <span className="ml-1 text-gray-700 capitalize">
-                          {user.children.replace('_', ' ')}
+                          {user.children.replace("_", " ")}
                         </span>
                       </div>
                     )}

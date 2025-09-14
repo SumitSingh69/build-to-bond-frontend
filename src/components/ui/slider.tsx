@@ -22,13 +22,13 @@ export const Slider: React.FC<SliderProps> = ({
   const [isDragging, setIsDragging] = React.useState<number | null>(null);
   const sliderRef = React.useRef<HTMLDivElement>(null);
 
-  const getValueFromPosition = (clientX: number) => {
+  const getValueFromPosition = React.useCallback((clientX: number) => {
     if (!sliderRef.current) return min;
     const rect = sliderRef.current.getBoundingClientRect();
     const percentage = (clientX - rect.left) / rect.width;
     const newValue = min + percentage * (max - min);
     return Math.round(Math.max(min, Math.min(max, newValue)) / step) * step;
-  };
+  }, [min, max, step]);
 
   const handleMouseDown = (index: number) => (e: React.MouseEvent) => {
     setIsDragging(index);
@@ -64,7 +64,7 @@ export const Slider: React.FC<SliderProps> = ({
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [isDragging, value, min, max, onValueChange]);
+  }, [isDragging, value, min, max, onValueChange, getValueFromPosition]);
 
   const getPercentage = (val: number) => ((val - min) / (max - min)) * 100;
 

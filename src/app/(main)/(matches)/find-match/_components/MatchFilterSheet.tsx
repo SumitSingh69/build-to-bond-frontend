@@ -13,7 +13,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sh
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Filter, X, RotateCcw, Check } from 'lucide-react';
+import { Filter, RotateCcw, Check } from 'lucide-react';
 
 interface MatchFilterSheetProps {
   filters: MatchFilters;
@@ -24,6 +24,15 @@ interface MatchFilterSheetProps {
   onClose: () => void;
   isLoading?: boolean;
 }
+
+// Narrowed union helpers to avoid any-casts
+type Education = NonNullable<MatchFilters['education']>[number];
+type Smoking = NonNullable<MatchFilters['smoking']>[number];
+type Drinking = NonNullable<MatchFilters['drinking']>[number];
+type Children = NonNullable<MatchFilters['children']>[number];
+type GenderPreference = NonNullable<MatchFilters['genderPreference']>;
+type LookingFor = NonNullable<MatchFilters['lookingFor']>;
+type LastActiveWithin = NonNullable<MatchFilters['lastActiveWithin']>;
 
 export const MatchFilterSheet: React.FC<MatchFilterSheetProps> = ({
   filters,
@@ -65,7 +74,7 @@ export const MatchFilterSheet: React.FC<MatchFilterSheetProps> = ({
       ageRange: DEFAULT_FILTERS.ageRange,
       heightRange: DEFAULT_FILTERS.heightRange,
       minProfileCompleteness: DEFAULT_FILTERS.minProfileCompleteness,
-      lastActiveWithin: DEFAULT_FILTERS.lastActiveWithin as 1 | 7 | 30,
+      lastActiveWithin: DEFAULT_FILTERS.lastActiveWithin as LastActiveWithin,
     };
     setTempFilters(clearedFilters);
     onFiltersChange(clearedFilters);
@@ -163,10 +172,10 @@ export const MatchFilterSheet: React.FC<MatchFilterSheetProps> = ({
 
             {/* Looking For (Radio) */}
             <div className="space-y-4">
-              <Label className="text-lg font-semibold text-gray-900">I'm looking for</Label>
+              <Label className="text-lg font-semibold text-gray-900">I’m looking for</Label>
               <RadioGroup
                 value={tempFilters.genderPreference || ''}
-                onValueChange={(value) => updateFilter('genderPreference', value as any)}
+                onValueChange={(value) => updateFilter('genderPreference', value as GenderPreference)}
               >
                 {FILTER_OPTIONS.genderPreferenceOptions.map((option) => (
                   <RadioGroupItem key={option.value} value={option.value}>
@@ -183,7 +192,7 @@ export const MatchFilterSheet: React.FC<MatchFilterSheetProps> = ({
               <Label className="text-lg font-semibold text-gray-900">Relationship Type</Label>
               <RadioGroup
                 value={tempFilters.lookingFor || ''}
-                onValueChange={(value) => updateFilter('lookingFor', value as any)}
+                onValueChange={(value) => updateFilter('lookingFor', value as LookingFor)}
               >
                 {FILTER_OPTIONS.lookingForOptions.map((option) => (
                   <RadioGroupItem key={option.value} value={option.value}>
@@ -236,7 +245,7 @@ export const MatchFilterSheet: React.FC<MatchFilterSheetProps> = ({
               <Label className="text-lg font-semibold text-gray-900">Education Level</Label>
               <div className="grid grid-cols-1 gap-3">
                 {FILTER_OPTIONS.educationOptions.map((option) => {
-                  const isSelected = tempFilters.education?.includes(option.value as any) || false;
+                  const isSelected = tempFilters.education?.includes(option.value as Education) || false;
                   return (
                     <label
                       key={option.value}
@@ -266,7 +275,7 @@ export const MatchFilterSheet: React.FC<MatchFilterSheetProps> = ({
                 <Label className="text-base font-medium text-gray-700">Smoking</Label>
                 <div className="grid grid-cols-2 gap-2">
                   {FILTER_OPTIONS.smokingOptions.map((option) => {
-                    const isSelected = tempFilters.smoking?.includes(option.value as any) || false;
+                    const isSelected = tempFilters.smoking?.includes(option.value as Smoking) || false;
                     return (
                       <label
                         key={option.value}
@@ -290,7 +299,7 @@ export const MatchFilterSheet: React.FC<MatchFilterSheetProps> = ({
                 <Label className="text-base font-medium text-gray-700">Drinking</Label>
                 <div className="grid grid-cols-2 gap-2">
                   {FILTER_OPTIONS.drinkingOptions.map((option) => {
-                    const isSelected = tempFilters.drinking?.includes(option.value as any) || false;
+                    const isSelected = tempFilters.drinking?.includes(option.value as Drinking) || false;
                     return (
                       <label
                         key={option.value}
@@ -314,7 +323,7 @@ export const MatchFilterSheet: React.FC<MatchFilterSheetProps> = ({
                 <Label className="text-base font-medium text-gray-700">Children</Label>
                 <div className="grid grid-cols-1 gap-2">
                   {FILTER_OPTIONS.childrenOptions.map((option) => {
-                    const isSelected = tempFilters.children?.includes(option.value as any) || false;
+                    const isSelected = tempFilters.children?.includes(option.value as Children) || false;
                     return (
                       <label
                         key={option.value}
@@ -345,7 +354,7 @@ export const MatchFilterSheet: React.FC<MatchFilterSheetProps> = ({
                 <Label className="text-base font-medium text-gray-700">Last Active</Label>
                 <RadioGroup
                   value={tempFilters.lastActiveWithin?.toString() || ''}
-                  onValueChange={(value) => updateFilter('lastActiveWithin', parseInt(value) as any)}
+                  onValueChange={(value) => updateFilter('lastActiveWithin', parseInt(value) as LastActiveWithin)}
                 >
                   {FILTER_OPTIONS.lastActiveOptions.map((option) => (
                     <RadioGroupItem key={option.value} value={option.value.toString()}>

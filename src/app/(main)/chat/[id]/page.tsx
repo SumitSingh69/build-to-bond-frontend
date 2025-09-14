@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useParams } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { useSocket, MessageData } from "@/context/SocketContext";
@@ -19,7 +19,7 @@ import { Loader2 } from "lucide-react";
 const ChatPage: React.FC = () => {
   const params = useParams();
   const { user } = useAuth();
-  const { isConnected, onNewMessage, joinRoom, leaveRoom } = useSocket();
+  const { isConnected, onNewMessage, onMessagesSeen, joinRoom, leaveRoom } = useSocket();
   const {
     fetchRoomWithMessages,
     sendMessage: sendApiMessage,
@@ -39,6 +39,17 @@ const ChatPage: React.FC = () => {
   );
   const { onlineUsers } = useOnlineStatus();
 
+  const chatsRef = useRef(chats);
+  const onlineUsersRef = useRef(onlineUsers);
+  
+  useEffect(() => {
+    chatsRef.current = chats;
+  }, [chats]);
+  
+  useEffect(() => {
+    onlineUsersRef.current = onlineUsers;
+  }, [onlineUsers]);
+
   useEffect(() => {
     const loadChatData = async () => {
       if (!roomId || !user) return;
@@ -56,10 +67,10 @@ const ChatPage: React.FC = () => {
         if (roomUser) {
           setChatUser({
             ...roomUser,
-            isOnline: onlineUsers.includes(roomUser.id),
+            isOnline: onlineUsersRef.current.includes(roomUser.id),
           });
         } else {
-          const currentChat = chats.find((chat) => chat.roomId === roomId);
+          const currentChat = chatsRef.current.find((chat) => chat.roomId === roomId);
           if (currentChat) {
             const otherUser = currentChat.participants.find(
               (p) => p.id !== user._id
@@ -67,7 +78,7 @@ const ChatPage: React.FC = () => {
             if (otherUser) {
               setChatUser({
                 ...otherUser,
-                isOnline: onlineUsers.includes(otherUser.id),
+                isOnline: onlineUsersRef.current.includes(otherUser.id),
               });
             }
           }
@@ -86,16 +97,12 @@ const ChatPage: React.FC = () => {
         leaveRoom(roomId);
       }
     };
-  }, [roomId, user, fetchRoomWithMessages, chats, joinRoom, leaveRoom]);
+  }, [roomId, user, fetchRoomWithMessages, joinRoom, leaveRoom]);
 
   useEffect(() => {
     if (!roomId || !user) return;
 
-    console.log("Setting up real-time message listener for room:", roomId);
-
-    const unsubscribe = onNewMessage((newMessageData: MessageData) => {
-      console.log("Received new message via socket:", newMessageData);
-
+  const unsubscribe = onNewMessage((newMessageData: MessageData) => {
       if (newMessageData.roomId === roomId) {
         const newMessage: Message = {
           id: newMessageData._id || Date.now().toString(),
@@ -112,22 +119,47 @@ const ChatPage: React.FC = () => {
         };
 
         setMessages((prev) => {
-          const exists = prev.some((msg) => msg.id === newMessage.id);
-          if (exists) {
-            console.log("Message already exists, skipping duplicate");
+          if (prev.some((msg) => msg.id === newMessage.id)) {
             return prev;
           }
-          console.log("Adding new message to state");
+
+          const optimisticIdx = prev.findIndex(
+            (m) => m.isOwn && (m.status === 'sending' || m.status === 'sent') && m.text === newMessage.text
+          );
+
+          if (optimisticIdx !== -1) {
+            const copy = prev.slice();
+            copy[optimisticIdx] = newMessage; 
+            return copy;
+          }
+
           return [...prev, newMessage];
         });
       }
     });
 
     return () => {
-      console.log("Cleaning up real-time message listener");
       unsubscribe();
     };
   }, [roomId, user, onNewMessage]);
+
+  
+  useEffect(() => {
+    if (!roomId || !user) return;
+
+    const unsubscribeSeen = onMessagesSeen((seenData) => {
+      if (seenData.roomId !== roomId) return;
+      setMessages((prev) => prev.map((msg) =>
+        msg.isOwn && seenData.messageIds.includes(msg.id)
+          ? { ...msg, status: 'read' as const }
+          : msg
+      ));
+    });
+
+    return () => {
+      unsubscribeSeen();
+    };
+  }, [roomId, user, onMessagesSeen]);
 
   useEffect(() => {
     if (chatUser) {
@@ -140,7 +172,7 @@ const ChatPage: React.FC = () => {
           : null
       );
     }
-  }, [onlineUsers, chatUser?.id]);
+  }, [onlineUsers, chatUser]);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -159,20 +191,31 @@ const ChatPage: React.FC = () => {
 
     const messageText = message.trim();
 
-    setMessage("");
+    const optimistic: Message = {
+      id: `optimistic-${Date.now()}`,
+      text: messageText,
+      messageType: 'text',
+      senderId: user._id,
+      timestamp: new Date(),
+      isOwn: true,
+      status: 'sending',
+    };
+    setMessages((prev) => [...prev, optimistic]);
 
+    setMessage("");
     handleStopTyping();
 
     try {
       const success = await sendApiMessage(roomId, messageText, "text");
 
       if (!success) {
+        setMessages((prev) => prev.filter((m) => m.id !== optimistic.id));
         setMessage(messageText);
-        console.error("Failed to send message via API");
+      } else {
+        setMessages((prev) => prev.map((m) => m.id === optimistic.id ? { ...m, status: 'sent' } : m));
       }
-    } catch (error) {
-      console.error("Error sending message:", error);
-
+    } catch {
+      setMessages((prev) => prev.filter((m) => m.id !== optimistic.id));
       setMessage(messageText);
     }
   };
@@ -225,8 +268,6 @@ const ChatPage: React.FC = () => {
         showBackButton={showMobileBack}
         isConnected={isConnected}
         typingUsers={typingUsers.filter((userId) => userId !== user._id)}
-        onVideoCall={() => console.log("Video call")}
-        onMoreOptions={() => console.log("More options")}
       />
 
       <div className="flex-1 overflow-hidden">

@@ -1,11 +1,14 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Enforce linting and type-checking during builds
   eslint: {
-    ignoreDuringBuilds: true,
+    // When false/omitted, Next.js will fail the build on ESLint errors
+    // ignoreDuringBuilds: false,
   },
   typescript: {
-    ignoreBuildErrors: true,
+    // When false/omitted, Next.js will fail the build on TypeScript errors
+    // ignoreBuildErrors: false,
   },
   images: {
     remotePatterns: [

@@ -1,15 +1,12 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { ChatSidebar } from "./_components";
-import { Chat, ChatUser } from "./types";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { useChatData } from "@/hooks/useChatData";
 import { Loader2 } from "lucide-react";
-
-const mockChats: Chat[] = [];
 
 interface ChatLayoutProps {
   children: React.ReactNode;
@@ -18,26 +15,20 @@ interface ChatLayoutProps {
 const ChatLayout: React.FC<ChatLayoutProps> = ({ children }) => {
   const pathname = usePathname();
   const router = useRouter();
-  const { chats, loading, error, currentUser, refreshChats } = useChatData();
+  const { chats, loading, error, currentUser, refreshChats, markChatAsReadLocal } = useChatData();
 
   const isSpecificChat = pathname.startsWith("/chat/") && pathname !== "/chat";
   const currentChatId = isSpecificChat ? pathname.split("/chat/")[1] : null;
 
   useEffect(() => {
     if (currentChatId) {
-      // Mark chat as read - this could be handled by the backend
-      console.log(`Marking chat ${currentChatId} as read`);
-      // TODO: Implement mark as read API call
+      markChatAsReadLocal(currentChatId);
     }
-  }, [currentChatId]);
+  }, [currentChatId, markChatAsReadLocal]);
 
-  const markChatAsRead = (chatId: string) => {
-    // This would ideally make an API call to mark messages as read
-    console.log(`Marking chat ${chatId} as read`);
-    // For now, we'll let the backend handle this when messages are fetched
-  };
 
   const handleChatSelect = (chatId: string) => {
+    markChatAsReadLocal(chatId);
     router.push(`/chat/${chatId}`);
   };
 
