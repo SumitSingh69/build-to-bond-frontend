@@ -293,24 +293,12 @@ export const authAPI = {
     }),
 
   updateProfile: (data: Record<string, unknown>, profilePicture?: File) => {
-    if (profilePicture) {
-      // Handle file upload with FormData
-      const formData = new FormData();
-      formData.append('profilePicture', profilePicture);
-      formData.append('profileData', JSON.stringify(data));
-      
-      return apiRequest("/users/profile", {
-        method: "PUT",
-        body: formData,
-        // Don't set Content-Type header, let browser set it for FormData
-      }, true);
-    } else {
-      // Handle regular JSON update
-      return apiRequest("/users/profile", {
-        method: "PUT",
-        body: JSON.stringify(data),
-      });
-    }
+    // For now, only handle regular JSON update (no file uploads)
+    console.log('Frontend API - updateProfile called with:', data);
+    return apiRequest("/users/profile", {
+      method: "PUT",
+      body: JSON.stringify(data),
+    });
   },
 
   changePassword: (currentPassword: string, newPassword: string) =>
