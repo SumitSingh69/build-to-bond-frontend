@@ -127,10 +127,13 @@ const refreshAccessToken = async (): Promise<boolean> => {
   return result;
 };
 
-const createHeaders = (includeAuth: boolean = true): HeadersInit => {
-  const headers: HeadersInit = {
-    "Content-Type": "application/json",
-  };
+const createHeaders = (includeAuth: boolean = true, isFormData: boolean = false): HeadersInit => {
+  const headers: HeadersInit = {};
+
+  // Only set Content-Type for non-FormData requests
+  if (!isFormData) {
+    headers["Content-Type"] = "application/json";
+  }
 
   if (includeAuth) {
     const token = getAuthToken();
@@ -149,6 +152,9 @@ export const apiRequest = async <T = unknown>(
   retryOnUnauthorized: boolean = true
 ): Promise<T> => {
   const url = `${API_BASE_URL}${endpoint}`;
+  
+  // Check if the body is FormData
+  const isFormData = options.body instanceof FormData;
 
   if (includeAuth && typeof window !== "undefined") {
     const token = getAuthToken();
@@ -168,7 +174,7 @@ export const apiRequest = async <T = unknown>(
   let response = await fetch(url, {
     ...options,
     headers: {
-      ...createHeaders(includeAuth),
+      ...createHeaders(includeAuth, isFormData),
       ...options.headers,
     },
   });
@@ -188,7 +194,7 @@ export const apiRequest = async <T = unknown>(
       response = await fetch(url, {
         ...options,
         headers: {
-          ...createHeaders(includeAuth),
+          ...createHeaders(includeAuth, isFormData),
           ...options.headers,
         },
       });
@@ -281,11 +287,31 @@ export const authAPI = {
       method: "GET",
     }),
 
-  updateProfile: (data: Record<string, unknown>) =>
-    apiRequest("/users/profile", {
-      method: "PUT",
-      body: JSON.stringify(data),
+  refreshProfile: () =>
+    apiRequest("/users/refresh", {
+      method: "GET",
     }),
+
+  updateProfile: (data: Record<string, unknown>, profilePicture?: File) => {
+    if (profilePicture) {
+      // Handle file upload with FormData
+      const formData = new FormData();
+      formData.append('profilePicture', profilePicture);
+      formData.append('profileData', JSON.stringify(data));
+      
+      return apiRequest("/users/profile", {
+        method: "PUT",
+        body: formData,
+        // Don't set Content-Type header, let browser set it for FormData
+      }, true);
+    } else {
+      // Handle regular JSON update
+      return apiRequest("/users/profile", {
+        method: "PUT",
+        body: JSON.stringify(data),
+      });
+    }
+  },
 
   changePassword: (currentPassword: string, newPassword: string) =>
     apiRequest("/users/change-password", {

@@ -9,6 +9,7 @@ import React, {
   useRef,
 } from "react";
 import { io, Socket } from "socket.io-client";
+import config from "@/lib/config";
 import { useAuth } from "./AuthContext";
 
 export interface MessageData {
@@ -80,9 +81,6 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
   const reconnectAttempts = useRef(0);
   const maxReconnectAttempts = 5;
 
-  const BACKEND_URL =
-    process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000";
-
   const connect = useCallback(() => {
     if (!user?._id) return;
 
@@ -94,7 +92,14 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
       socket.disconnect();
     }
 
-    const newSocket = io(BACKEND_URL, {
+    console.log('Connecting to socket server:', config.socketUrl);
+    console.log('Socket connection config:', {
+      socketUrl: config.socketUrl,
+      userId: user._id,
+      transports: ["websocket", "polling"]
+    });
+
+    const newSocket = io(config.socketUrl, {
       query: { userId: user._id },
       transports: ["websocket", "polling"],
       timeout: 20000,
@@ -128,7 +133,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
     });
 
     setSocket(newSocket);
-  }, [user?._id, BACKEND_URL]);
+  }, [user?._id]);
 
   const disconnectSocket = useCallback(() => {
     setSocket((currentSocket) => {

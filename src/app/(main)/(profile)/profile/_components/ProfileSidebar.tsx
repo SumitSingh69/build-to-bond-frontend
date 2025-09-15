@@ -1,15 +1,16 @@
-import React from "react";
+import React, { useState } from "react";
 import Image from "next/image";
-import { Edit, Camera } from "lucide-react";
+import { Edit, Camera, Upload, X } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { User } from "@/types/auth.types";
 import BioDisplay from "@/components/BioDisplay";
+import { toast } from "sonner";
 
 interface ProfileSidebarProps {
   profile: User | null;
   onEdit?: () => void;
-  onProfilePictureChange?: (file: File) => void;
+  onProfilePictureChange?: (file: File) => Promise<void>;
   onRefresh?: () => void;
   isLoading?: boolean;
 }
@@ -21,10 +22,35 @@ export default function ProfileSidebar({
   onRefresh,
   isLoading = false,
 }: ProfileSidebarProps) {
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const [isUploading, setIsUploading] = useState(false);
+
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file && onProfilePictureChange) {
-      onProfilePictureChange(file);
+    if (!file) return;
+
+    // Validate file type
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      toast.error('Invalid file type. Please select a JPEG, PNG, or WebP image.');
+      return;
+    }
+
+    // Validate file size (5MB)
+    const maxSize = 5 * 1024 * 1024;
+    if (file.size > maxSize) {
+      toast.error('File size too large. Maximum size is 5MB.');
+      return;
+    }
+
+    if (onProfilePictureChange) {
+      setIsUploading(true);
+      try {
+        await onProfilePictureChange(file);
+      } finally {
+        setIsUploading(false);
+        // Clear the input so same file can be selected again
+        event.target.value = '';
+      }
     }
   };
 
@@ -48,9 +74,9 @@ export default function ProfileSidebar({
         <div className="flex flex-col items-center mb-4 lg:mb-6">
           <div className="relative group">
             <div className="w-24 h-24 lg:w-32 lg:h-32 rounded-full border-4 border-primary-100 shadow-lg overflow-hidden bg-gradient-to-br from-primary-200 to-primary-300 flex items-center justify-center">
-              {profile.profilePicture ? (
+              {(typeof profile.profilePicture === 'string' ? profile.profilePicture : profile.profilePicture?.url) ? (
                 <Image
-                  src={profile.profilePicture}
+                  src={typeof profile.profilePicture === 'string' ? profile.profilePicture : profile.profilePicture?.url || ''}
                   alt={
                     `${profile.firstName || ""} ${
                       profile.lastName || ""
@@ -73,17 +99,24 @@ export default function ProfileSidebar({
 
             <label
               htmlFor="profile-picture-upload"
-              className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+              className={`absolute inset-0 bg-black/50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity ${
+                isUploading || isLoading ? 'cursor-not-allowed' : 'cursor-pointer'
+              }`}
             >
-              <Camera className="w-6 h-6 lg:w-8 lg:h-8 text-white" />
+              {isUploading ? (
+                <div className="w-6 h-6 lg:w-8 lg:h-8 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <Camera className="w-6 h-6 lg:w-8 lg:h-8 text-white" />
+              )}
             </label>
 
             <input
               id="profile-picture-upload"
               type="file"
-              accept="image/*"
+              accept="image/jpeg,image/jpg,image/png,image/webp"
               className="hidden"
               onChange={handleFileChange}
+              disabled={isUploading || isLoading}
             />
           </div>
 
@@ -91,6 +124,11 @@ export default function ProfileSidebar({
             {`${profile.firstName || ""} ${profile.lastName || ""}`.trim() ||
               "No name"}
           </h2>
+          
+          {/* Upload hint */}
+          <p className="text-xs text-gray-400 text-center mt-1">
+            {isUploading ? "Uploading..." : "Click photo to change"}
+          </p>
         </div>
 
         <div className="space-y-3 lg:space-y-4">

@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { User } from "@/types/auth.types";
 import { Save, X, User as UserIcon } from "lucide-react";
 import { toast } from "sonner";
+import ProfilePictureUpload from "@/components/ProfilePictureUpload";
 
 import BasicInformationSection from "./BasicInformationSection";
 import DatingPreferencesSection from "./DatingPreferencesSection";
@@ -24,7 +25,7 @@ interface EditProfileModalProps {
   isOpen: boolean;
   onClose: () => void;
   user: User;
-  onSave: (updatedData: Partial<User>) => Promise<void>;
+  onSave: (updatedData: Partial<User>, profilePicture?: File | null) => Promise<void>;
   isLoading?: boolean;
 }
 
@@ -36,6 +37,7 @@ export default function EditProfileModal({
   isLoading = false,
 }: EditProfileModalProps) {
   const [formData, setFormData] = useState<EditProfileFormData>({});
+  const [selectedProfilePicture, setSelectedProfilePicture] = useState<File | null>(null);
 
   useEffect(() => {
     if (isOpen && user) {
@@ -139,7 +141,7 @@ export default function EditProfileModal({
         })
       );
 
-      await onSave(cleanedData);
+      await onSave(cleanedData, selectedProfilePicture);
       onClose();
       toast.success("Profile updated successfully!");
     } catch (error) {
@@ -170,6 +172,24 @@ export default function EditProfileModal({
         </DialogHeader>
 
         <div className="space-y-8 py-3">
+          {/* Profile Picture Upload Section */}
+          <div className="border-b border-border pb-6">
+            <h3 className="text-lg font-semibold mb-4 text-foreground">
+              Profile Picture
+            </h3>
+            <ProfilePictureUpload
+              currentProfilePicture={
+                typeof user.profilePicture === 'string' 
+                  ? user.profilePicture 
+                  : user.profilePicture?.url || user.avatar
+              }
+              userName={`${user.firstName} ${user.lastName}`}
+              onFileSelect={setSelectedProfilePicture}
+              isUploading={isLoading}
+              disabled={isLoading}
+            />
+          </div>
+
           <BasicInformationSection
             formData={formData}
             onFieldChange={handleInputChange}

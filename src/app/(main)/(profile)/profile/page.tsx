@@ -19,7 +19,9 @@ import { NotificationItem } from "./types";
 import { useAuth } from "@/context/AuthContext";
 import { User } from "@/types/auth.types";
 import { apiRequest } from "@/lib/api";
+import apiModule from "@/lib/api";
 import { toast } from "sonner";
+import { handleProfileUpdateFlow } from "@/lib/profile-utils";
 
 const mockNotifications: NotificationItem[] = [
   {
@@ -139,7 +141,10 @@ function ProfilePageContent() {
     }
   }, [dataLoaded, handleRefreshProfile]);
 
-  const handleProfileSave = async (updatedData: Partial<User>) => {
+  const handleProfileSave = async (
+    updatedData: Partial<User>,
+    profilePicture?: File | null
+  ) => {
     if (!user) return;
 
     setIsLoading(true);
@@ -152,22 +157,38 @@ function ProfilePageContent() {
         passedBy: undefined,
       };
 
-      const response = await apiRequest<{
+      let response: {
         success: boolean;
         data?: { user: User };
         error?: boolean;
         errorCode?: string;
         errors?: Array<{ field: string; message: string }>;
         message?: string;
-      }>("/users/profile", {
-        method: "PUT",
-        body: JSON.stringify(updatePayload),
-      });
+      };
+
+      if (profilePicture) {
+        response = (await apiModule.authAPI.updateProfile(
+          updatePayload,
+          profilePicture
+        )) as any;
+      } else {
+        response = await apiRequest<{
+          success: boolean;
+          data?: { user: User };
+          error?: boolean;
+          errorCode?: string;
+          errors?: Array<{ field: string; message: string }>;
+          message?: string;
+        }>("/users/profile", {
+          method: "PUT",
+          body: JSON.stringify(updatePayload),
+        });
+      }
 
       if (response.errorCode === "VALIDATION_ERROR" && response.errors) {
         const fieldErrors = response.errors
           .map(
-            (err) =>
+            (err: { field: string; message: string }) =>
               `${err.field.charAt(0).toUpperCase() + err.field.slice(1)}: ${
                 err.message
               }`
@@ -178,17 +199,11 @@ function ProfilePageContent() {
         return;
       }
 
-      if (response.success && response.data) {
-        updateAuthProfile(response.data.user);
-
-        if (typeof window !== "undefined") {
-          localStorage.setItem("user", JSON.stringify(response.data.user));
-        }
-
-        toast.success("Profile updated successfully!");
-      } else {
-        toast.error(response.message || "Failed to update profile");
-      }
+      await handleProfileUpdateFlow(
+        response,
+        updateAuthProfile,
+        "Profile updated successfully!"
+      );
     } catch (error) {
       console.error("Profile update error:", error);
       toast.error(
@@ -203,8 +218,49 @@ function ProfilePageContent() {
     setIsEditModalOpen(true);
   };
 
-  const handleProfilePictureChange = (file: File) => {
-    console.log("Profile picture changed:", file.name);
+  const handleProfilePictureChange = async (file: File) => {
+    if (!user) return;
+
+    const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+    if (!allowedTypes.includes(file.type)) {
+      toast.error(
+        "Invalid file type. Please select a JPEG, PNG, or WebP image."
+      );
+      return;
+    }
+
+    const maxSize = 5 * 1024 * 1024;
+    if (file.size > maxSize) {
+      toast.error("File size too large. Maximum size is 5MB.");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const response = (await apiModule.authAPI.updateProfile({}, file)) as {
+        success: boolean;
+        data?: { user: User };
+        error?: boolean;
+        errorCode?: string;
+        errors?: Array<{ field: string; message: string }>;
+        message?: string;
+      };
+
+      await handleProfileUpdateFlow(
+        response,
+        updateAuthProfile,
+        "Profile picture updated successfully!"
+      );
+    } catch (error) {
+      console.error("Profile picture update error:", error);
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Failed to update profile picture"
+      );
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleNotificationClick = (notification: NotificationItem) => {

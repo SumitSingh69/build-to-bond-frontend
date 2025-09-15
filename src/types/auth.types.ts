@@ -9,7 +9,27 @@ export interface User {
   gender?: "male" | "female" | "other";
   bio?: string;
   interests?: string[];
-  profilePicture?: string;
+  profilePicture?: string | {
+    url: string;
+    fileId: string;
+    fileName: string;
+    filePath: string;
+    size: number;
+    thumbnailUrl?: string;
+    variants?: {
+      thumbnail?: string;
+      small?: string;
+      medium?: string;
+      large?: string;
+    };
+    uploadedAt?: string;
+    metadata?: {
+      uploadedAt: Date;
+      userId: string;
+      originalName: string;
+      mimeType: string;
+    };
+  };
   avatar?: string;
   location?: {
     address?: string;

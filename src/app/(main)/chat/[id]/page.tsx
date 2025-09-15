@@ -163,16 +163,20 @@ const ChatPage: React.FC = () => {
 
   useEffect(() => {
     if (chatUser) {
-      setChatUser((prev) =>
-        prev
-          ? {
-              ...prev,
-              isOnline: onlineUsers.includes(prev.id),
-            }
-          : null
-      );
+      const isCurrentlyOnline = onlineUsers.includes(chatUser.id);
+      // Only update if the online status actually changed
+      if (chatUser.isOnline !== isCurrentlyOnline) {
+        setChatUser((prev) =>
+          prev
+            ? {
+                ...prev,
+                isOnline: isCurrentlyOnline,
+              }
+            : null
+        );
+      }
     }
-  }, [onlineUsers, chatUser]);
+  }, [onlineUsers]); // Removed chatUser from dependencies to prevent infinite loop
 
   useEffect(() => {
     const checkMobile = () => {
