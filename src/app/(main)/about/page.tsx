@@ -6,7 +6,7 @@ const AboutUsPage = () => {
       id: 1,
       name: "Satrasala Hari priya",
       role: "Lead Frontend Developer",
-      image: "https://images.unsplash.com/photo-1494790108755-2616b612b789?w=300&h=300&fit=crop&crop=face",
+      image: "/assets/hari-priya.jpg ",
       description: "Expert in Next.js and React, creating seamless user experiences for meaningful connections."
     },
     {
