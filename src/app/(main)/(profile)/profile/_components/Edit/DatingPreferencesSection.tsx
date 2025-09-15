@@ -15,7 +15,7 @@ import SectionHeader from "./SectionHeader";
 export default function DatingPreferencesSection({
   formData,
   onFieldChange,
-  onAgeRangeChange
+  onAgeRangeChange,
 }: DatingPreferencesSectionProps) {
   return (
     <div className="bg-white border border-border rounded-xl p-6 shadow-sm">
@@ -26,7 +26,6 @@ export default function DatingPreferencesSection({
       />
 
       <div className="space-y-6">
-        {/* Gender and Preference */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="space-y-3">
             <Label
@@ -58,7 +57,9 @@ export default function DatingPreferencesSection({
             </Label>
             <Select
               value={formData.genderPreference || ""}
-              onValueChange={(value) => onFieldChange("genderPreference", value)}
+              onValueChange={(value) =>
+                onFieldChange("genderPreference", value)
+              }
             >
               <SelectTrigger className="h-11 border-border focus:border-primary focus:ring-primary/20">
                 <SelectValue placeholder="Select gender preference" />
@@ -73,7 +74,6 @@ export default function DatingPreferencesSection({
           </div>
         </div>
 
-        {/* Relationship Type and Privacy */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="space-y-3">
             <Label
@@ -91,7 +91,9 @@ export default function DatingPreferencesSection({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="friendship">New Friends</SelectItem>
-                <SelectItem value="relationship">Serious Relationship</SelectItem>
+                <SelectItem value="relationship">
+                  Serious Relationship
+                </SelectItem>
                 <SelectItem value="casual">Casual Dating</SelectItem>
                 <SelectItem value="other">Something Else</SelectItem>
               </SelectContent>
@@ -119,7 +121,6 @@ export default function DatingPreferencesSection({
           </div>
         </div>
 
-        {/* Age Range Slider */}
         <div className="space-y-3">
           <Label className="text-sm font-medium text-primary">
             Age Range Preference

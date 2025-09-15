@@ -14,7 +14,7 @@ import SectionHeader from "./SectionHeader";
 
 export default function PersonalDetailsSection({
   formData,
-  onFieldChange
+  onFieldChange,
 }: PersonalDetailsSectionProps) {
   return (
     <div className="bg-white border border-border rounded-xl p-6 shadow-sm">
@@ -25,7 +25,6 @@ export default function PersonalDetailsSection({
       />
 
       <div className="space-y-6">
-        {/* Occupation and Education */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-3">
             <Label
@@ -67,7 +66,6 @@ export default function PersonalDetailsSection({
           </div>
         </div>
 
-        {/* Height, Children, Religion */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="space-y-3">
             <Label
@@ -133,7 +131,6 @@ export default function PersonalDetailsSection({
           </div>
         </div>
 
-        {/* Smoking and Drinking */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-3">
             <Label
@@ -185,7 +182,6 @@ export default function PersonalDetailsSection({
           </div>
         </div>
 
-        {/* Relationship Status */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-3">
             <Label
@@ -196,7 +192,9 @@ export default function PersonalDetailsSection({
             </Label>
             <Select
               value={formData.relationshipStatus || ""}
-              onValueChange={(value) => onFieldChange("relationshipStatus", value)}
+              onValueChange={(value) =>
+                onFieldChange("relationshipStatus", value)
+              }
             >
               <SelectTrigger className="h-11 border-border focus:border-primary focus:ring-primary/20">
                 <SelectValue placeholder="Select your status" />

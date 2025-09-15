@@ -7,7 +7,7 @@ import SectionHeader from "./SectionHeader";
 
 export default function LocationSection({
   formData,
-  onNestedFieldChange
+  onNestedFieldChange,
 }: LocationSectionProps) {
   return (
     <div className="bg-white border border-border rounded-xl p-6 shadow-sm">
@@ -18,12 +18,8 @@ export default function LocationSection({
       />
 
       <div className="space-y-6">
-        {/* Full Address */}
         <div className="space-y-3">
-          <Label
-            htmlFor="address"
-            className="text-sm font-medium text-primary"
-          >
+          <Label htmlFor="address" className="text-sm font-medium text-primary">
             Full Address
           </Label>
           <Input
@@ -37,13 +33,9 @@ export default function LocationSection({
           />
         </div>
 
-        {/* City and Country */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="space-y-3">
-            <Label
-              htmlFor="city"
-              className="text-sm font-medium text-primary"
-            >
+            <Label htmlFor="city" className="text-sm font-medium text-primary">
               City
             </Label>
             <Input

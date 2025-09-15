@@ -25,10 +25,13 @@ const PICKUP_LINES = [
   "Is your dad a boxer? Because you're a knockout! 🥊💥",
   "Do you have a Band-Aid? Because I just scraped my knee falling for you. 🩹💘",
   "Are you a campfire? Because you're hot and I want s'more. 🔥🍫",
-  "If you were a fruit, you'd be a fineapple. 🍍👑"
+  "If you were a fruit, you'd be a fineapple. 🍍👑",
 ];
 
-const PickupLineModal: React.FC<PickupLineModalProps> = ({ isOpen, onClose }) => {
+const PickupLineModal: React.FC<PickupLineModalProps> = ({
+  isOpen,
+  onClose,
+}) => {
   const [currentLineIndex, setCurrentLineIndex] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
 
@@ -36,13 +39,13 @@ const PickupLineModal: React.FC<PickupLineModalProps> = ({ isOpen, onClose }) =>
 
   const generateNewLine = () => {
     setIsAnimating(true);
-    
+
     setTimeout(() => {
       let newIndex;
       do {
         newIndex = Math.floor(Math.random() * PICKUP_LINES.length);
       } while (newIndex === currentLineIndex && PICKUP_LINES.length > 1);
-      
+
       setCurrentLineIndex(newIndex);
       setIsAnimating(false);
     }, 200);
@@ -51,16 +54,15 @@ const PickupLineModal: React.FC<PickupLineModalProps> = ({ isOpen, onClose }) =>
   const currentLine = PICKUP_LINES[currentLineIndex];
 
   return (
-    <div 
+    <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}
+      style={{ backgroundColor: "rgba(0, 0, 0, 0.5)" }}
       onClick={onClose}
     >
-      <div 
+      <div
         className="bg-white rounded-2xl max-w-md w-full max-h-[90vh] overflow-y-auto shadow-2xl transform transition-all duration-300"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-gradient-to-r from-rose-50 to-pink-50">
           <div className="flex items-center gap-2">
             <Heart className="w-5 h-5 text-rose-500" />
@@ -75,14 +77,12 @@ const PickupLineModal: React.FC<PickupLineModalProps> = ({ isOpen, onClose }) =>
           </button>
         </div>
 
-        {/* Content */}
         <div className="p-6">
-          {/* Doodle Image */}
           <div className="flex items-center justify-center mb-6">
             <div className="w-48 h-48 bg-gradient-to-br from-rose-50 to-pink-50 rounded-xl p-4">
-              <Image 
-                src="/assets/hero/hero-01.png" 
-                alt="Cute couple illustration" 
+              <Image
+                src="/assets/hero/hero-01.png"
+                alt="Cute couple illustration"
                 width={200}
                 height={200}
                 className="w-full h-full object-contain rounded-xl"
@@ -91,22 +91,28 @@ const PickupLineModal: React.FC<PickupLineModalProps> = ({ isOpen, onClose }) =>
             </div>
           </div>
 
-          {/* Pickup Line */}
           <div className="text-center mb-6">
             <div className="bg-gradient-to-r from-rose-50 via-pink-50 to-rose-50 rounded-xl p-6 border border-rose-100">
-              <p className={`text-lg text-gray-800 font-medium leading-relaxed transition-all duration-300 ${
-                isAnimating ? 'opacity-0 transform scale-95' : 'opacity-100 transform scale-100'
-              }`}>
+              <p
+                className={`text-lg text-gray-800 font-medium leading-relaxed transition-all duration-300 ${
+                  isAnimating
+                    ? "opacity-0 transform scale-95"
+                    : "opacity-100 transform scale-100"
+                }`}
+              >
                 {currentLine}
               </p>
             </div>
           </div>
 
-          {/* Stats */}
           <div className="flex justify-center gap-4 mb-6">
             <div className="text-center">
-              <div className="text-sm font-semibold text-rose-600">Line #{currentLineIndex + 1}</div>
-              <div className="text-xs text-gray-500">of {PICKUP_LINES.length}</div>
+              <div className="text-sm font-semibold text-rose-600">
+                Line #{currentLineIndex + 1}
+              </div>
+              <div className="text-xs text-gray-500">
+                of {PICKUP_LINES.length}
+              </div>
             </div>
             <div className="text-center">
               <div className="text-sm font-semibold text-pink-600">🔥 Hot</div>
@@ -114,7 +120,6 @@ const PickupLineModal: React.FC<PickupLineModalProps> = ({ isOpen, onClose }) =>
             </div>
           </div>
 
-          {/* Action Buttons */}
           <div className="flex gap-3">
             <Button
               variant="outline"
@@ -128,12 +133,13 @@ const PickupLineModal: React.FC<PickupLineModalProps> = ({ isOpen, onClose }) =>
               onClick={generateNewLine}
               disabled={isAnimating}
             >
-              <RefreshCw className={`w-4 h-4 mr-2 ${isAnimating ? 'animate-spin' : ''}`} />
-              {isAnimating ? 'Loading...' : 'New Line'}
+              <RefreshCw
+                className={`w-4 h-4 mr-2 ${isAnimating ? "animate-spin" : ""}`}
+              />
+              {isAnimating ? "Loading..." : "New Line"}
             </Button>
           </div>
 
-          {/* Fun Message */}
           <div className="mt-4 text-center">
             <p className="text-xs text-gray-500 italic">
               💡 Pro tip: Confidence is your best accessory!

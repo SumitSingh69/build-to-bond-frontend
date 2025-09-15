@@ -36,7 +36,7 @@ const MatchCard: React.FC<MatchCardProps> = ({
   };
 
   const handleButtonClick = (e: React.MouseEvent, action: () => void) => {
-    e.stopPropagation(); // Prevent card click when button is clicked
+    e.stopPropagation();
     action();
   };
 

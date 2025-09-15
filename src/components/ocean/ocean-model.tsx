@@ -204,7 +204,6 @@ const OceanModel: React.FC<OceanModelProps> = ({ isOpen, onClose }) => {
     try {
       await new Promise((resolve) => setTimeout(resolve, 2000));
 
-
       setAnswers({});
       setCurrentQuestionIndex(0);
       onClose();
@@ -258,13 +257,19 @@ const OceanModel: React.FC<OceanModelProps> = ({ isOpen, onClose }) => {
           </div>
 
           <div className="mb-4">
-            <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${
-              currentQuestion?.category === 'Openness' ? 'bg-primary-50 text-primary-700' :
-              currentQuestion?.category === 'Conscientiousness' ? 'bg-primary-100 text-primary-800' :
-              currentQuestion?.category === 'Extraversion' ? 'bg-primary-200 text-primary-900' :
-              currentQuestion?.category === 'Agreeableness' ? 'bg-primary-50 text-primary-600' :
-              'bg-primary-100 text-primary-700'
-            }`}>
+            <span
+              className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${
+                currentQuestion?.category === "Openness"
+                  ? "bg-primary-50 text-primary-700"
+                  : currentQuestion?.category === "Conscientiousness"
+                  ? "bg-primary-100 text-primary-800"
+                  : currentQuestion?.category === "Extraversion"
+                  ? "bg-primary-200 text-primary-900"
+                  : currentQuestion?.category === "Agreeableness"
+                  ? "bg-primary-50 text-primary-600"
+                  : "bg-primary-100 text-primary-700"
+              }`}
+            >
               {currentQuestion?.category}
             </span>
           </div>

@@ -1,19 +1,24 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
-import { MatchFilters } from '../types/filter.types';
-import { FILTER_OPTIONS, DEFAULT_FILTERS } from '../constants/filter.constants';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Slider } from '@/components/ui/slider';
-import { Switch } from '@/components/ui/switch';
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Filter, RotateCcw, Check } from 'lucide-react';
+import React, { useState, useEffect } from "react";
+import { MatchFilters } from "../types/filter.types";
+import { FILTER_OPTIONS, DEFAULT_FILTERS } from "../constants/filter.constants";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Slider } from "@/components/ui/slider";
+import { Switch } from "@/components/ui/switch";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Filter, RotateCcw, Check } from "lucide-react";
 
 interface MatchFilterSheetProps {
   filters: MatchFilters;
@@ -24,14 +29,13 @@ interface MatchFilterSheetProps {
   isLoading?: boolean;
 }
 
-// Narrowed union helpers to avoid any-casts
-type Education = NonNullable<MatchFilters['education']>[number];
-type Smoking = NonNullable<MatchFilters['smoking']>[number];
-type Drinking = NonNullable<MatchFilters['drinking']>[number];
-type Children = NonNullable<MatchFilters['children']>[number];
-type GenderPreference = NonNullable<MatchFilters['genderPreference']>;
-type LookingFor = NonNullable<MatchFilters['lookingFor']>;
-type LastActiveWithin = NonNullable<MatchFilters['lastActiveWithin']>;
+type Education = NonNullable<MatchFilters["education"]>[number];
+type Smoking = NonNullable<MatchFilters["smoking"]>[number];
+type Drinking = NonNullable<MatchFilters["drinking"]>[number];
+type Children = NonNullable<MatchFilters["children"]>[number];
+type GenderPreference = NonNullable<MatchFilters["genderPreference"]>;
+type LookingFor = NonNullable<MatchFilters["lookingFor"]>;
+type LastActiveWithin = NonNullable<MatchFilters["lastActiveWithin"]>;
 
 export const MatchFilterSheet: React.FC<MatchFilterSheetProps> = ({
   filters,
@@ -44,12 +48,10 @@ export const MatchFilterSheet: React.FC<MatchFilterSheetProps> = ({
   const [tempFilters, setTempFilters] = useState<MatchFilters>(filters);
   const [hasChanges, setHasChanges] = useState(false);
 
-  // Update tempFilters when filters prop changes
   useEffect(() => {
     setTempFilters(filters);
   }, [filters]);
 
-  // Check if there are changes
   useEffect(() => {
     setHasChanges(JSON.stringify(tempFilters) !== JSON.stringify(filters));
   }, [tempFilters, filters]);
@@ -58,7 +60,7 @@ export const MatchFilterSheet: React.FC<MatchFilterSheetProps> = ({
     key: K,
     value: MatchFilters[K]
   ) => {
-    setTempFilters(prev => ({ ...prev, [key]: value }));
+    setTempFilters((prev) => ({ ...prev, [key]: value }));
   };
 
   const handleApply = () => {
@@ -84,22 +86,34 @@ export const MatchFilterSheet: React.FC<MatchFilterSheetProps> = ({
   ) => {
     const currentArray = (tempFilters[key] as string[]) || [];
     let newArray: string[];
-    
+
     if (currentArray.includes(value)) {
-      newArray = currentArray.filter(item => item !== value);
+      newArray = currentArray.filter((item) => item !== value);
     } else {
       newArray = [...currentArray, value];
     }
-    
-    updateFilter(key, newArray.length > 0 ? newArray as MatchFilters[K] : undefined);
+
+    updateFilter(
+      key,
+      newArray.length > 0 ? (newArray as MatchFilters[K]) : undefined
+    );
   };
 
   const getActiveFiltersCount = () => {
     let count = 0;
-    if (tempFilters.ageRange && (tempFilters.ageRange.min !== 18 || tempFilters.ageRange.max !== 99)) count++;
+    if (
+      tempFilters.ageRange &&
+      (tempFilters.ageRange.min !== 18 || tempFilters.ageRange.max !== 99)
+    )
+      count++;
     if (tempFilters.genderPreference) count++;
     if (tempFilters.lookingFor) count++;
-    if (tempFilters.heightRange && (tempFilters.heightRange.min !== 140 || tempFilters.heightRange.max !== 220)) count++;
+    if (
+      tempFilters.heightRange &&
+      (tempFilters.heightRange.min !== 140 ||
+        tempFilters.heightRange.max !== 220)
+    )
+      count++;
     if (tempFilters.education?.length) count++;
     if (tempFilters.smoking?.length) count++;
     if (tempFilters.drinking?.length) count++;
@@ -108,21 +122,32 @@ export const MatchFilterSheet: React.FC<MatchFilterSheetProps> = ({
     if (tempFilters.religion) count++;
     if (tempFilters.languages?.length) count++;
     if (tempFilters.isVerified) count++;
-    if (tempFilters.lastActiveWithin && tempFilters.lastActiveWithin !== 30) count++;
-    if (tempFilters.minProfileCompleteness && tempFilters.minProfileCompleteness > 0) count++;
+    if (tempFilters.lastActiveWithin && tempFilters.lastActiveWithin !== 30)
+      count++;
+    if (
+      tempFilters.minProfileCompleteness &&
+      tempFilters.minProfileCompleteness > 0
+    )
+      count++;
     return count;
   };
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
-      <SheetContent side="right" className="w-full sm:w-[500px] sm:max-w-[500px] p-3">
+      <SheetContent
+        side="right"
+        className="w-full sm:w-[500px] sm:max-w-[500px] p-3"
+      >
         <SheetHeader className="pb-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Filter className="w-5 h-5 text-primary-600" />
               <SheetTitle className="text-xl">Filters</SheetTitle>
               {getActiveFiltersCount() > 0 && (
-                <Badge variant="secondary" className="bg-primary-100 text-primary-700">
+                <Badge
+                  variant="secondary"
+                  className="bg-primary-100 text-primary-700"
+                >
                   {getActiveFiltersCount()} active
                 </Badge>
               )}
@@ -141,10 +166,11 @@ export const MatchFilterSheet: React.FC<MatchFilterSheetProps> = ({
 
         <ScrollArea className="h-[calc(100vh-160px)] pr-4">
           <div className="space-y-6">
-            
             {/* Age Range */}
             <div className="space-y-4">
-              <Label className="text-lg font-semibold text-gray-900">Age Range</Label>
+              <Label className="text-lg font-semibold text-gray-900">
+                Age Range
+              </Label>
               <div className="px-4 py-6 bg-gray-50 rounded-xl">
                 <div className="flex justify-between items-center mb-4">
                   <span className="text-sm font-medium text-gray-600">
@@ -155,10 +181,13 @@ export const MatchFilterSheet: React.FC<MatchFilterSheetProps> = ({
                   </span>
                 </div>
                 <Slider
-                  value={[tempFilters.ageRange?.min || 18, tempFilters.ageRange?.max || 99]}
+                  value={[
+                    tempFilters.ageRange?.min || 18,
+                    tempFilters.ageRange?.max || 99,
+                  ]}
                   onValueChange={(values: number[]) => {
                     const [min, max] = values;
-                    updateFilter('ageRange', { min, max });
+                    updateFilter("ageRange", { min, max });
                   }}
                   min={18}
                   max={99}
@@ -172,10 +201,14 @@ export const MatchFilterSheet: React.FC<MatchFilterSheetProps> = ({
 
             {/* Looking For (Radio) */}
             <div className="space-y-4">
-              <Label className="text-lg font-semibold text-gray-900">I’m looking for</Label>
+              <Label className="text-lg font-semibold text-gray-900">
+                I’m looking for
+              </Label>
               <RadioGroup
-                value={tempFilters.genderPreference || ''}
-                onValueChange={(value) => updateFilter('genderPreference', value as GenderPreference)}
+                value={tempFilters.genderPreference || ""}
+                onValueChange={(value) =>
+                  updateFilter("genderPreference", value as GenderPreference)
+                }
               >
                 {FILTER_OPTIONS.genderPreferenceOptions.map((option) => (
                   <RadioGroupItem key={option.value} value={option.value}>
@@ -189,20 +222,26 @@ export const MatchFilterSheet: React.FC<MatchFilterSheetProps> = ({
 
             {/* Relationship Type (Radio) */}
             <div className="space-y-4">
-              <Label className="text-lg font-semibold text-gray-900">Relationship Type</Label>
+              <Label className="text-lg font-semibold text-gray-900">
+                Relationship Type
+              </Label>
               <RadioGroup
-                value={tempFilters.lookingFor || ''}
-                onValueChange={(value) => updateFilter('lookingFor', value as LookingFor)}
+                value={tempFilters.lookingFor || ""}
+                onValueChange={(value) =>
+                  updateFilter("lookingFor", value as LookingFor)
+                }
               >
                 {FILTER_OPTIONS.lookingForOptions.map((option) => (
                   <RadioGroupItem key={option.value} value={option.value}>
                     <div>
                       <span className="font-medium">{option.label}</span>
                       <p className="text-sm text-gray-500 mt-1">
-                        {option.value === 'friendship' && 'Looking for platonic connections'}
-                        {option.value === 'relationship' && 'Seeking long-term commitment'}
-                        {option.value === 'casual' && 'Open to casual dating'}
-                        {option.value === 'other' && 'Something else in mind'}
+                        {option.value === "friendship" &&
+                          "Looking for platonic connections"}
+                        {option.value === "relationship" &&
+                          "Seeking long-term commitment"}
+                        {option.value === "casual" && "Open to casual dating"}
+                        {option.value === "other" && "Something else in mind"}
                       </p>
                     </div>
                   </RadioGroupItem>
@@ -214,7 +253,9 @@ export const MatchFilterSheet: React.FC<MatchFilterSheetProps> = ({
 
             {/* Height Range */}
             <div className="space-y-4">
-              <Label className="text-lg font-semibold text-gray-900">Height Range</Label>
+              <Label className="text-lg font-semibold text-gray-900">
+                Height Range
+              </Label>
               <div className="px-4 py-6 bg-gray-50 rounded-xl">
                 <div className="flex justify-between items-center mb-4">
                   <span className="text-sm font-medium text-gray-600">
@@ -225,10 +266,13 @@ export const MatchFilterSheet: React.FC<MatchFilterSheetProps> = ({
                   </span>
                 </div>
                 <Slider
-                  value={[tempFilters.heightRange?.min || 140, tempFilters.heightRange?.max || 220]}
+                  value={[
+                    tempFilters.heightRange?.min || 140,
+                    tempFilters.heightRange?.max || 220,
+                  ]}
                   onValueChange={(values: number[]) => {
                     const [min, max] = values;
-                    updateFilter('heightRange', { min, max });
+                    updateFilter("heightRange", { min, max });
                   }}
                   min={140}
                   max={220}
@@ -242,20 +286,29 @@ export const MatchFilterSheet: React.FC<MatchFilterSheetProps> = ({
 
             {/* Education (Checkboxes) */}
             <div className="space-y-4">
-              <Label className="text-lg font-semibold text-gray-900">Education Level</Label>
+              <Label className="text-lg font-semibold text-gray-900">
+                Education Level
+              </Label>
               <div className="grid grid-cols-1 gap-3">
                 {FILTER_OPTIONS.educationOptions.map((option) => {
-                  const isSelected = tempFilters.education?.includes(option.value as Education) || false;
+                  const isSelected =
+                    tempFilters.education?.includes(
+                      option.value as Education
+                    ) || false;
                   return (
                     <label
                       key={option.value}
                       className={`flex items-center space-x-3 p-3 rounded-lg border cursor-pointer transition-all hover:bg-gray-50 ${
-                        isSelected ? 'border-primary-500 bg-primary-50' : 'border-gray-200'
+                        isSelected
+                          ? "border-primary-500 bg-primary-50"
+                          : "border-gray-200"
                       }`}
                     >
                       <Checkbox
                         checked={isSelected}
-                        onCheckedChange={() => toggleArrayFilter('education', option.value)}
+                        onCheckedChange={() =>
+                          toggleArrayFilter("education", option.value)
+                        }
                       />
                       <span className="font-medium">{option.label}</span>
                     </label>
@@ -268,24 +321,34 @@ export const MatchFilterSheet: React.FC<MatchFilterSheetProps> = ({
 
             {/* Lifestyle Preferences */}
             <div className="space-y-6">
-              <Label className="text-lg font-semibold text-gray-900">Lifestyle Preferences</Label>
-              
+              <Label className="text-lg font-semibold text-gray-900">
+                Lifestyle Preferences
+              </Label>
+
               {/* Smoking */}
               <div className="space-y-3">
-                <Label className="text-base font-medium text-gray-700">Smoking</Label>
+                <Label className="text-base font-medium text-gray-700">
+                  Smoking
+                </Label>
                 <div className="grid grid-cols-2 gap-2">
                   {FILTER_OPTIONS.smokingOptions.map((option) => {
-                    const isSelected = tempFilters.smoking?.includes(option.value as Smoking) || false;
+                    const isSelected =
+                      tempFilters.smoking?.includes(option.value as Smoking) ||
+                      false;
                     return (
                       <label
                         key={option.value}
                         className={`flex items-center space-x-2 p-2 rounded-lg border cursor-pointer transition-all text-sm ${
-                          isSelected ? 'border-primary-500 bg-primary-50' : 'border-gray-200 hover:bg-gray-50'
+                          isSelected
+                            ? "border-primary-500 bg-primary-50"
+                            : "border-gray-200 hover:bg-gray-50"
                         }`}
                       >
                         <Checkbox
                           checked={isSelected}
-                          onCheckedChange={() => toggleArrayFilter('smoking', option.value)}
+                          onCheckedChange={() =>
+                            toggleArrayFilter("smoking", option.value)
+                          }
                         />
                         <span>{option.label}</span>
                       </label>
@@ -296,20 +359,29 @@ export const MatchFilterSheet: React.FC<MatchFilterSheetProps> = ({
 
               {/* Drinking */}
               <div className="space-y-3">
-                <Label className="text-base font-medium text-gray-700">Drinking</Label>
+                <Label className="text-base font-medium text-gray-700">
+                  Drinking
+                </Label>
                 <div className="grid grid-cols-2 gap-2">
                   {FILTER_OPTIONS.drinkingOptions.map((option) => {
-                    const isSelected = tempFilters.drinking?.includes(option.value as Drinking) || false;
+                    const isSelected =
+                      tempFilters.drinking?.includes(
+                        option.value as Drinking
+                      ) || false;
                     return (
                       <label
                         key={option.value}
                         className={`flex items-center space-x-2 p-2 rounded-lg border cursor-pointer transition-all text-sm ${
-                          isSelected ? 'border-primary-500 bg-primary-50' : 'border-gray-200 hover:bg-gray-50'
+                          isSelected
+                            ? "border-primary-500 bg-primary-50"
+                            : "border-gray-200 hover:bg-gray-50"
                         }`}
                       >
                         <Checkbox
                           checked={isSelected}
-                          onCheckedChange={() => toggleArrayFilter('drinking', option.value)}
+                          onCheckedChange={() =>
+                            toggleArrayFilter("drinking", option.value)
+                          }
                         />
                         <span>{option.label}</span>
                       </label>
@@ -320,20 +392,29 @@ export const MatchFilterSheet: React.FC<MatchFilterSheetProps> = ({
 
               {/* Children */}
               <div className="space-y-3">
-                <Label className="text-base font-medium text-gray-700">Children</Label>
+                <Label className="text-base font-medium text-gray-700">
+                  Children
+                </Label>
                 <div className="grid grid-cols-1 gap-2">
                   {FILTER_OPTIONS.childrenOptions.map((option) => {
-                    const isSelected = tempFilters.children?.includes(option.value as Children) || false;
+                    const isSelected =
+                      tempFilters.children?.includes(
+                        option.value as Children
+                      ) || false;
                     return (
                       <label
                         key={option.value}
                         className={`flex items-center space-x-2 p-3 rounded-lg border cursor-pointer transition-all ${
-                          isSelected ? 'border-primary-500 bg-primary-50' : 'border-gray-200 hover:bg-gray-50'
+                          isSelected
+                            ? "border-primary-500 bg-primary-50"
+                            : "border-gray-200 hover:bg-gray-50"
                         }`}
                       >
                         <Checkbox
                           checked={isSelected}
-                          onCheckedChange={() => toggleArrayFilter('children', option.value)}
+                          onCheckedChange={() =>
+                            toggleArrayFilter("children", option.value)
+                          }
                         />
                         <span className="font-medium">{option.label}</span>
                       </label>
@@ -347,20 +428,27 @@ export const MatchFilterSheet: React.FC<MatchFilterSheetProps> = ({
 
             {/* Interests */}
             <div className="space-y-4">
-              <Label className="text-lg font-semibold text-gray-900">Interests</Label>
+              <Label className="text-lg font-semibold text-gray-900">
+                Interests
+              </Label>
               <div className="grid grid-cols-2 gap-2">
                 {FILTER_OPTIONS.interestOptions.map((option) => {
-                  const isSelected = tempFilters.interests?.includes(option.value) || false;
+                  const isSelected =
+                    tempFilters.interests?.includes(option.value) || false;
                   return (
                     <label
                       key={option.value}
                       className={`flex items-center space-x-2 p-2 rounded-lg border cursor-pointer transition-all text-sm ${
-                        isSelected ? 'border-primary-500 bg-primary-50' : 'border-gray-200 hover:bg-gray-50'
+                        isSelected
+                          ? "border-primary-500 bg-primary-50"
+                          : "border-gray-200 hover:bg-gray-50"
                       }`}
                     >
                       <Checkbox
                         checked={isSelected}
-                        onCheckedChange={() => toggleArrayFilter('interests', option.value)}
+                        onCheckedChange={() =>
+                          toggleArrayFilter("interests", option.value)
+                        }
                       />
                       <span>{option.label}</span>
                     </label>
@@ -373,10 +461,14 @@ export const MatchFilterSheet: React.FC<MatchFilterSheetProps> = ({
 
             {/* Religion */}
             <div className="space-y-4">
-              <Label className="text-lg font-semibold text-gray-900">Religion</Label>
+              <Label className="text-lg font-semibold text-gray-900">
+                Religion
+              </Label>
               <RadioGroup
-                value={tempFilters.religion || ''}
-                onValueChange={(value) => updateFilter('religion', value || undefined)}
+                value={tempFilters.religion || ""}
+                onValueChange={(value) =>
+                  updateFilter("religion", value || undefined)
+                }
               >
                 <RadioGroupItem value="">
                   <span className="font-medium">Any</span>
@@ -393,20 +485,27 @@ export const MatchFilterSheet: React.FC<MatchFilterSheetProps> = ({
 
             {/* Languages */}
             <div className="space-y-4">
-              <Label className="text-lg font-semibold text-gray-900">Languages</Label>
+              <Label className="text-lg font-semibold text-gray-900">
+                Languages
+              </Label>
               <div className="grid grid-cols-2 gap-2">
                 {FILTER_OPTIONS.languageOptions.map((option) => {
-                  const isSelected = tempFilters.languages?.includes(option.value) || false;
+                  const isSelected =
+                    tempFilters.languages?.includes(option.value) || false;
                   return (
                     <label
                       key={option.value}
                       className={`flex items-center space-x-2 p-2 rounded-lg border cursor-pointer transition-all text-sm ${
-                        isSelected ? 'border-primary-500 bg-primary-50' : 'border-gray-200 hover:bg-gray-50'
+                        isSelected
+                          ? "border-primary-500 bg-primary-50"
+                          : "border-gray-200 hover:bg-gray-50"
                       }`}
                     >
                       <Checkbox
                         checked={isSelected}
-                        onCheckedChange={() => toggleArrayFilter('languages', option.value)}
+                        onCheckedChange={() =>
+                          toggleArrayFilter("languages", option.value)
+                        }
                       />
                       <span>{option.label}</span>
                     </label>
@@ -419,17 +518,29 @@ export const MatchFilterSheet: React.FC<MatchFilterSheetProps> = ({
 
             {/* Activity & Verification */}
             <div className="space-y-6">
-              <Label className="text-lg font-semibold text-gray-900">Activity & Verification</Label>
-              
+              <Label className="text-lg font-semibold text-gray-900">
+                Activity & Verification
+              </Label>
+
               {/* Last Active (Radio) */}
               <div className="space-y-3">
-                <Label className="text-base font-medium text-gray-700">Last Active</Label>
+                <Label className="text-base font-medium text-gray-700">
+                  Last Active
+                </Label>
                 <RadioGroup
-                  value={tempFilters.lastActiveWithin?.toString() || ''}
-                  onValueChange={(value) => updateFilter('lastActiveWithin', parseInt(value) as LastActiveWithin)}
+                  value={tempFilters.lastActiveWithin?.toString() || ""}
+                  onValueChange={(value) =>
+                    updateFilter(
+                      "lastActiveWithin",
+                      parseInt(value) as LastActiveWithin
+                    )
+                  }
                 >
                   {FILTER_OPTIONS.lastActiveOptions.map((option) => (
-                    <RadioGroupItem key={option.value} value={option.value.toString()}>
+                    <RadioGroupItem
+                      key={option.value}
+                      value={option.value.toString()}
+                    >
                       <span className="font-medium">{option.label}</span>
                     </RadioGroupItem>
                   ))}
@@ -439,15 +550,20 @@ export const MatchFilterSheet: React.FC<MatchFilterSheetProps> = ({
               {/* Verified Only (Switch) */}
               <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
                 <div>
-                  <Label className="text-base font-medium text-gray-900">Verified profiles only</Label>
-                  <p className="text-sm text-gray-500 mt-1">Show only users with verified photos</p>
+                  <Label className="text-base font-medium text-gray-900">
+                    Verified profiles only
+                  </Label>
+                  <p className="text-sm text-gray-500 mt-1">
+                    Show only users with verified photos
+                  </p>
                 </div>
                 <Switch
                   checked={tempFilters.isVerified || false}
-                  onCheckedChange={(checked) => updateFilter('isVerified', checked)}
+                  onCheckedChange={(checked) =>
+                    updateFilter("isVerified", checked)
+                  }
                 />
               </div>
-
             </div>
           </div>
         </ScrollArea>
@@ -477,7 +593,8 @@ export const MatchFilterSheet: React.FC<MatchFilterSheetProps> = ({
                 <div className="flex items-center text-white">
                   <Check className="w-4 h-4 mr-2" />
                   Apply Filters
-                  {getActiveFiltersCount() > 0 && ` (${getActiveFiltersCount()})`}
+                  {getActiveFiltersCount() > 0 &&
+                    ` (${getActiveFiltersCount()})`}
                 </div>
               )}
             </Button>

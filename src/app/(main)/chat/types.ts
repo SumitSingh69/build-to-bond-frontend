@@ -10,7 +10,7 @@ export interface Message {
   mediaUrl?: string;
   fileName?: string;
   fileSize?: number;
-  duration?: number; // for voice messages
+  duration?: number; 
   replyTo?: {
     messageId: string;
     content: string;
@@ -75,7 +75,6 @@ export interface ChatRoom {
   updatedAt: Date;
 }
 
-// Speech Recognition Types
 export interface SpeechRecognitionEvent extends Event {
   results: SpeechRecognitionResultList;
   resultIndex: number;

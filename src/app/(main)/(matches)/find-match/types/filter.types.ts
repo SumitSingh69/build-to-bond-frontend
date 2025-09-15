@@ -15,27 +15,29 @@ export interface LocationFilter {
 }
 
 export interface MatchFilters {
-  // Primary filters
   ageRange?: AgeRange;
-  gender?: 'male' | 'female' | 'other';
-  genderPreference?: 'men' | 'women' | 'both' | 'other';
+  gender?: "male" | "female" | "other";
+  genderPreference?: "men" | "women" | "both" | "other";
   location?: LocationFilter;
-  lookingFor?: 'friendship' | 'relationship' | 'casual' | 'other';
-  
-  // Secondary filters
-  education?: ('high_school' | 'bachelor' | 'master' | 'phd' | 'other')[];
+  lookingFor?: "friendship" | "relationship" | "casual" | "other";
+
+  education?: ("high_school" | "bachelor" | "master" | "phd" | "other")[];
   heightRange?: HeightRange;
-  smoking?: ('never' | 'sometimes' | 'regularly' | 'prefer_not_to_say')[];
-  drinking?: ('never' | 'socially' | 'regularly' | 'prefer_not_to_say')[];
-  children?: ('none' | 'have_children' | 'want_children' | 'dont_want_children')[];
-  relationshipStatus?: ('single' | 'divorced' | 'widowed')[];
-  
-  // Additional filters
+  smoking?: ("never" | "sometimes" | "regularly" | "prefer_not_to_say")[];
+  drinking?: ("never" | "socially" | "regularly" | "prefer_not_to_say")[];
+  children?: (
+    | "none"
+    | "have_children"
+    | "want_children"
+    | "dont_want_children"
+  )[];
+  relationshipStatus?: ("single" | "divorced" | "widowed")[];
+
   interests?: string[];
   religion?: string;
   languages?: string[];
   isVerified?: boolean;
-  lastActiveWithin?: 1 | 7 | 30; // days
+  lastActiveWithin?: 1 | 7 | 30;
   minProfileCompleteness?: number;
 }
 

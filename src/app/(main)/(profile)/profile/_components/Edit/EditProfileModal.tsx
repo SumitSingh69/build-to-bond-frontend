@@ -170,7 +170,6 @@ export default function EditProfileModal({
         </DialogHeader>
 
         <div className="space-y-8 py-3">
-          {/* Basic Information Section */}
           <BasicInformationSection
             formData={formData}
             onFieldChange={handleInputChange}
@@ -178,7 +177,6 @@ export default function EditProfileModal({
             getBioCharCount={getBioCharCount}
           />
 
-          {/* Dating Preferences Section */}
           <DatingPreferencesSection
             formData={formData}
             onFieldChange={handleInputChange}
@@ -186,14 +184,12 @@ export default function EditProfileModal({
             onAgeRangeChange={handleAgeRangeChange}
           />
 
-          {/* Personal Details Section */}
           <PersonalDetailsSection
             formData={formData}
             onFieldChange={handleInputChange}
             onNestedFieldChange={handleNestedInputChange}
           />
 
-          {/* Location Section */}
           <LocationSection
             formData={formData}
             onFieldChange={handleInputChange}
@@ -234,4 +230,3 @@ export default function EditProfileModal({
     </Dialog>
   );
 }
-      

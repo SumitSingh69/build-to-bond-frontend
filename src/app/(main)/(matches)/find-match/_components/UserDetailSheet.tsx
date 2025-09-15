@@ -324,7 +324,6 @@ export const UserDetailSheet: React.FC<UserDetailSheetProps> = ({
                 )}
               </div>
 
-              {/* Interests */}
               {user.interests && user.interests.length > 0 && (
                 <div>
                   <h3 className="text-lg font-semibold mb-3 text-gray-800">
@@ -344,7 +343,6 @@ export const UserDetailSheet: React.FC<UserDetailSheetProps> = ({
                 </div>
               )}
 
-              {/* What they're looking for */}
               {user.lookingFor && (
                 <div>
                   <h3 className="text-lg font-semibold mb-3 text-gray-800">
@@ -381,7 +379,6 @@ export const UserDetailSheet: React.FC<UserDetailSheetProps> = ({
                 </div>
               )} */}
 
-              {/* Lifestyle */}
               {(user.smoking ||
                 user.drinking ||
                 user.relationshipStatus ||

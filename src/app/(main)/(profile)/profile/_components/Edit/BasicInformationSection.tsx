@@ -9,7 +9,7 @@ import SectionHeader from "./SectionHeader";
 export default function BasicInformationSection({
   formData,
   onFieldChange,
-  getBioCharCount
+  getBioCharCount,
 }: BasicInformationSectionProps) {
   const handleBioChange = (value: string) => {
     if (value.length <= 150) {
@@ -26,7 +26,6 @@ export default function BasicInformationSection({
       />
 
       <div className="space-y-6">
-        {/* Name Fields */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="space-y-3">
             <Label
@@ -60,13 +59,9 @@ export default function BasicInformationSection({
           </div>
         </div>
 
-        {/* Contact Fields */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="space-y-3">
-            <Label
-              htmlFor="email"
-              className="text-sm font-medium text-primary"
-            >
+            <Label htmlFor="email" className="text-sm font-medium text-primary">
               Email Address
             </Label>
             <Input
@@ -79,10 +74,7 @@ export default function BasicInformationSection({
             />
           </div>
           <div className="space-y-3">
-            <Label
-              htmlFor="phone"
-              className="text-sm font-medium text-primary"
-            >
+            <Label htmlFor="phone" className="text-sm font-medium text-primary">
               Phone Number
             </Label>
             <Input
@@ -96,7 +88,6 @@ export default function BasicInformationSection({
           </div>
         </div>
 
-        {/* Bio Field */}
         <div className="space-y-3">
           <Label
             htmlFor="bio"

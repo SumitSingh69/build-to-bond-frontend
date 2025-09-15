@@ -1,4 +1,6 @@
 ﻿"use client";
+
+
 import React, { useEffect, useState } from "react";
 import { apiRequest } from "@/lib/api";
 import { X, Star, Heart } from "lucide-react";
@@ -28,10 +30,23 @@ const FloatingCrons = () => {
   const [ratings, setRatings] = useState<{ [userId: string]: number }>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const isUserAuthenticated = () => {
+    if (typeof window === "undefined") return false;
+
+    const accessToken = localStorage.getItem("accessToken");
+    const refreshToken = localStorage.getItem("refreshToken");
+    const user = localStorage.getItem("user");
+
+    return !!(accessToken || refreshToken || user);
+  };
+
   useEffect(() => {
     const fetchPendingFeedback = async () => {
+      if (!isUserAuthenticated()) {
+        return;
+      }
+
       try {
-        console.log("Fetching pending feedback...");
         const response = (await apiRequest("/users/feedback/pending", {
           method: "GET",
         })) as FeedbackResponse;
@@ -45,7 +60,6 @@ const FloatingCrons = () => {
           processedData = { pendingFeedback: false, feedbackTo: [] };
         }
 
-        console.log("Processed feedback data:", processedData);
         setFeedbackData(processedData);
 
         if (
@@ -81,13 +95,30 @@ const FloatingCrons = () => {
   };
 
   const submitFeedback = async () => {
+    if (!isUserAuthenticated()) {
+      console.log("User not authenticated - cannot submit feedback");
+      setIsOpen(false);
+      return;
+    }
+
     setIsSubmitting(true);
     try {
-      console.log("Submitting feedback:", ratings);
-      await apiRequest("/users/feedback/submit", {
-        method: "POST",
-        body: JSON.stringify({ feedbacks: ratings }),
+  
+      const feedbackArray = Object.entries(ratings).map(([userId, rating]) => {
+        users.find((u) => u._id === userId);
+        return {
+          userId: userId,
+          rating: rating,
+        };
       });
+
+      await apiRequest("/users/feedback/pending", {
+        method: "POST",
+        body: JSON.stringify({
+          feedbacks: feedbackArray,
+        }),
+      });
+
       setIsOpen(false);
       setRatings({});
       setCurrentUserIndex(0);
@@ -107,11 +138,9 @@ const FloatingCrons = () => {
 
   const hasPendingFeedback = feedbackData?.pendingFeedback && users.length > 0;
 
-  // Don't render anything if no pending feedback
   if (!hasPendingFeedback) return null;
   return (
     <>
-      {/* Floating Button with Badge */}
       {!isOpen && (
         <div className="fixed bottom-6 left-6 z-50">
           <Button
@@ -120,7 +149,7 @@ const FloatingCrons = () => {
             size="icon"
           >
             <Heart className="h-6 w-6 text-white" />
-            {/* Badge showing count */}
+
             <div className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-6 w-6 flex items-center justify-center font-bold">
               {users.length}
             </div>
@@ -128,7 +157,6 @@ const FloatingCrons = () => {
         </div>
       )}
 
-      {/* Feedback Card */}
       {isOpen && currentUser && (
         <div className="fixed bottom-6 left-6 z-50">
           <Card className="w-80 shadow-xl border-0 bg-white">
@@ -151,7 +179,6 @@ const FloatingCrons = () => {
               </div>
 
               <div className="space-y-4">
-                {/* User Info */}
                 <div className="text-center">
                   <div className="text-sm text-gray-500 mb-1">
                     {currentUserIndex + 1} of {users.length}
@@ -164,7 +191,6 @@ const FloatingCrons = () => {
                   </p>
                 </div>
 
-                {/* Star Rating */}
                 <div>
                   <label className="text-sm font-medium text-gray-700 mb-2 block">
                     Rate your experience
@@ -188,7 +214,6 @@ const FloatingCrons = () => {
                   </div>
                 </div>
 
-                {/* Actions */}
                 <div className="flex gap-2 pt-2">
                   <Button
                     variant="outline"
@@ -217,7 +242,7 @@ const FloatingCrons = () => {
                         Submitting...
                       </div>
                     ) : currentUserIndex === users.length - 1 ? (
-                      "Submit"
+                      "Submit All"
                     ) : (
                       "Next"
                     )}

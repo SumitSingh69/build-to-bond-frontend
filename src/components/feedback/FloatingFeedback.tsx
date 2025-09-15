@@ -1,40 +1,38 @@
 "use client";
 
-import React, { useState } from 'react';
-import { MessageCircle, Star, X, Send } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Textarea } from '@/components/ui/textarea';
+import React, { useState } from "react";
+import { MessageCircle, Star, X, Send } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Textarea } from "@/components/ui/textarea";
 
 export const FloatingFeedback: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [rating, setRating] = useState(0);
-  const [comment, setComment] = useState('');
+  const [comment, setComment] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async () => {
     setIsSubmitting(true);
-    
-    // Simulate API call
+
     setTimeout(() => {
-      console.log('Feedback submitted:', { rating, comment });
+      console.log("Feedback submitted:", { rating, comment });
       setRating(0);
-      setComment('');
+      setComment("");
       setIsOpen(false);
       setIsSubmitting(false);
-      alert('Thank you for your feedback!');
+      alert("Thank you for your feedback!");
     }, 1000);
   };
 
   const handleClose = () => {
     setIsOpen(false);
     setRating(0);
-    setComment('');
+    setComment("");
   };
 
   return (
     <>
-      {/* Floating Button */}
       {!isOpen && (
         <div className="fixed bottom-6 right-6 z-50">
           <Button
@@ -47,7 +45,6 @@ export const FloatingFeedback: React.FC = () => {
         </div>
       )}
 
-      {/* Feedback Card */}
       {isOpen && (
         <div className="fixed bottom-6 right-6 z-50">
           <Card className="w-80 shadow-xl border-0 bg-white">
@@ -55,7 +52,9 @@ export const FloatingFeedback: React.FC = () => {
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
                   <MessageCircle className="h-5 w-5 text-blue-600" />
-                  <h3 className="font-semibold text-gray-900">Quick Feedback</h3>
+                  <h3 className="font-semibold text-gray-900">
+                    Quick Feedback
+                  </h3>
                 </div>
                 <Button
                   variant="ghost"
@@ -68,7 +67,6 @@ export const FloatingFeedback: React.FC = () => {
               </div>
 
               <div className="space-y-4">
-                {/* Rating */}
                 <div>
                   <label className="text-sm font-medium text-gray-700 mb-2 block">
                     How would you rate your experience?
@@ -83,8 +81,8 @@ export const FloatingFeedback: React.FC = () => {
                         <Star
                           className={`h-6 w-6 ${
                             star <= rating
-                              ? 'fill-yellow-400 text-yellow-400'
-                              : 'text-gray-300'
+                              ? "fill-yellow-400 text-yellow-400"
+                              : "text-gray-300"
                           }`}
                         />
                       </button>
@@ -92,7 +90,6 @@ export const FloatingFeedback: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Comment */}
                 <div>
                   <label className="text-sm font-medium text-gray-700 mb-2 block">
                     Any additional comments? (Optional)
@@ -106,7 +103,6 @@ export const FloatingFeedback: React.FC = () => {
                   />
                 </div>
 
-                {/* Actions */}
                 <div className="flex gap-2 pt-2">
                   <Button
                     variant="outline"

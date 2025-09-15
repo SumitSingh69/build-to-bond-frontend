@@ -1,11 +1,11 @@
-'use client';
+"use client";
 
-import React, { useState, useRef, useEffect } from 'react';
-import { Send, Mic, Plus, Image as ImageIcon, Paperclip } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { WindowWithSpeechRecognition } from '../types';
-import { Textarea } from '@/components/ui/textarea';
-import EmojiPickerComponent from './EmojiPicker';
+import React, { useState, useRef, useEffect } from "react";
+import { Send, Mic, Plus, Image as ImageIcon, Paperclip } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { WindowWithSpeechRecognition } from "../types";
+import { Textarea } from "@/components/ui/textarea";
+import EmojiPickerComponent from "./EmojiPicker";
 
 interface MessageInputProps {
   message: string;
@@ -32,7 +32,7 @@ const MessageInput: React.FC<MessageInputProps> = ({
   placeholder = "Type a message...",
   className = "",
   onStartTyping,
-  onStopTyping
+  onStopTyping,
 }) => {
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showAttachMenu, setShowAttachMenu] = useState(false);
@@ -47,60 +47,62 @@ const MessageInput: React.FC<MessageInputProps> = ({
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (emojiPickerRef.current && !emojiPickerRef.current.contains(event.target as Node)) {
+      if (
+        emojiPickerRef.current &&
+        !emojiPickerRef.current.contains(event.target as Node)
+      ) {
         setShowEmojiPicker(false);
       }
-      if (attachMenuRef.current && !attachMenuRef.current.contains(event.target as Node)) {
+      if (
+        attachMenuRef.current &&
+        !attachMenuRef.current.contains(event.target as Node)
+      ) {
         setShowAttachMenu(false);
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   useEffect(() => {
     if (textareaRef.current) {
-      textareaRef.current.style.height = '40px'; 
-      const scrollHeight = Math.min(textareaRef.current.scrollHeight, 70); 
+      textareaRef.current.style.height = "40px";
+      const scrollHeight = Math.min(textareaRef.current.scrollHeight, 70);
       textareaRef.current.style.height = `${scrollHeight}px`;
     }
   }, [message]);
 
-  // Handle typing indicators
   const handleMessageChange = (newMessage: string) => {
     onMessageChange(newMessage);
-    
+
     if (onStartTyping && onStopTyping) {
       if (newMessage.trim() && !isTyping) {
-        console.log('MessageInput: Starting typing indicator');
+        console.log("MessageInput: Starting typing indicator");
         setIsTyping(true);
         onStartTyping();
       }
-      
-      // Clear existing timeout
+
       if (typingTimeoutRef.current) {
         clearTimeout(typingTimeoutRef.current);
       }
-      
-      // Set new timeout to stop typing indicator
+
       if (newMessage.trim()) {
         typingTimeoutRef.current = setTimeout(() => {
-          console.log('MessageInput: Stopping typing indicator after timeout');
+          console.log("MessageInput: Stopping typing indicator after timeout");
           setIsTyping(false);
           onStopTyping();
-        }, 1500); // Stop typing after 1.5 seconds of inactivity
+        }, 1500);
       } else if (isTyping) {
-        console.log('MessageInput: Stopping typing indicator (message empty)');
+        console.log("MessageInput: Stopping typing indicator (message empty)");
         setIsTyping(false);
         onStopTyping();
       }
     } else {
-      console.log('MessageInput: No typing handlers provided');
+      console.log("MessageInput: No typing handlers provided");
     }
   };
 
-  // Cleanup typing timeout on unmount
   useEffect(() => {
     return () => {
       if (typingTimeoutRef.current) {
@@ -110,7 +112,7 @@ const MessageInput: React.FC<MessageInputProps> = ({
   }, []);
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
     }
@@ -130,20 +132,24 @@ const MessageInput: React.FC<MessageInputProps> = ({
 
   const handleVoiceRecord = async () => {
     const windowWithSpeech = window as WindowWithSpeechRecognition;
-    
-    if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
-      alert('Speech recognition is not supported in this browser.');
+
+    if (
+      !("webkitSpeechRecognition" in window || "SpeechRecognition" in window)
+    ) {
+      alert("Speech recognition is not supported in this browser.");
       return;
     }
 
-    const SpeechRecognition = windowWithSpeech.SpeechRecognition || windowWithSpeech.webkitSpeechRecognition;
+    const SpeechRecognition =
+      windowWithSpeech.SpeechRecognition ||
+      windowWithSpeech.webkitSpeechRecognition;
     if (!SpeechRecognition) {
-      alert('Speech recognition is not available.');
+      alert("Speech recognition is not available.");
       return;
     }
 
     const recognition = new SpeechRecognition();
-    recognition.lang = 'en-US';
+    recognition.lang = "en-US";
     recognition.interimResults = false;
     recognition.maxAlternatives = 1;
 
@@ -151,20 +157,19 @@ const MessageInput: React.FC<MessageInputProps> = ({
 
     recognition.onresult = (event) => {
       const transcript = event.results[0][0].transcript;
-      handleMessageChange(message ? message + ' ' + transcript : transcript);
+      handleMessageChange(message ? message + " " + transcript : transcript);
       setIsRecording(false);
-      
-      
+
       if (onVoiceRecord) {
-        console.log('Voice recording completed:', transcript);
-        
-        const mockBlob = new Blob([transcript], { type: 'text/plain' });
+        console.log("Voice recording completed:", transcript);
+
+        const mockBlob = new Blob([transcript], { type: "text/plain" });
         onVoiceRecord(mockBlob);
       }
     };
 
     recognition.onerror = () => {
-      alert('Speech recognition error occurred.');
+      alert("Speech recognition error occurred.");
       setIsRecording(false);
     };
 
@@ -200,23 +205,23 @@ const MessageInput: React.FC<MessageInputProps> = ({
   };
 
   return (
-    <div className={`px-3 py-2 md:p-4 border-t border-gray-200 bg-white/95 backdrop-blur-sm ${className}`}>
+    <div
+      className={`px-3 py-2 md:p-4 border-t border-gray-200 bg-white/95 backdrop-blur-sm ${className}`}
+    >
       <div className="flex items-center space-x-2 md:space-x-3 relative">
-        
         <div className="relative" ref={attachMenuRef}>
           <Button
             variant="ghost"
             size="sm"
             onClick={() => setShowAttachMenu(!showAttachMenu)}
             className={`h-7 w-7 md:h-8 md:w-8 rounded-full text-gray-500 hover:text-primary-600 hover:bg-primary-50 flex-shrink-0 transition-all duration-200 ${
-              showAttachMenu ? 'rotate-45 bg-primary-50 text-primary-600' : ''
+              showAttachMenu ? "rotate-45 bg-primary-50 text-primary-600" : ""
             }`}
             aria-label="Attach file"
           >
             <Plus className="w-3.5 h-3.5 md:w-4 md:h-4" />
           </Button>
-          
-          
+
           {showAttachMenu && (
             <div className="absolute bottom-12 left-0 bg-white border border-gray-200 rounded-lg shadow-lg p-2 z-50 min-w-[160px]">
               <Button
@@ -241,7 +246,6 @@ const MessageInput: React.FC<MessageInputProps> = ({
           )}
         </div>
 
-        
         <div className="relative" ref={emojiPickerRef}>
           <Button
             variant="ghost"
@@ -252,7 +256,7 @@ const MessageInput: React.FC<MessageInputProps> = ({
           >
             <span className="text-sm md:text-base">😊</span>
           </Button>
-          
+
           {showEmojiPicker && (
             <EmojiPickerComponent
               onEmojiSelect={handleEmojiSelect}
@@ -260,27 +264,25 @@ const MessageInput: React.FC<MessageInputProps> = ({
             />
           )}
         </div>
-        
-        
+
         <div className="flex-1 relative">
-           <Textarea
+          <Textarea
             ref={textareaRef}
             value={message}
             onChange={(e) => handleMessageChange(e.target.value)}
             onKeyPress={handleKeyPress}
             placeholder={placeholder}
-            disabled={disabled}            
+            disabled={disabled}
             className="w-full px-3 py-1.5 pr-8 md:pr-10 border border-gray-200 rounded-2xl bg-white text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 font-sans resize-none transition-all duration-200 shadow-sm text-sm min-h-[32px] max-h-[60px] overflow-y-auto"
           />
-         
-          
+
           <Button
             variant="ghost"
             size="sm"
             onClick={handleVoiceRecord}
             disabled={disabled}
             className={`absolute right-1.5 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-primary-600 hover:bg-primary-50 p-1 ${
-              isRecording ? 'text-red-500 animate-pulse' : ''
+              isRecording ? "text-red-500 animate-pulse" : ""
             }`}
             aria-label="Record message"
           >
@@ -288,7 +290,6 @@ const MessageInput: React.FC<MessageInputProps> = ({
           </Button>
         </div>
 
-        
         <Button
           onClick={handleSendMessage}
           disabled={!message.trim() || disabled}
@@ -300,7 +301,6 @@ const MessageInput: React.FC<MessageInputProps> = ({
         </Button>
       </div>
 
-      
       <input
         type="file"
         ref={imageInputRef}

@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import Image from 'next/image';
-import { Search, MessageCircle } from 'lucide-react';
-import { Chat, ChatUser } from '../types';
+import React, { useState } from "react";
+import Image from "next/image";
+import { Search, MessageCircle } from "lucide-react";
+import { Chat, ChatUser } from "../types";
 
 interface ChatSidebarProps {
   chats: Chat[];
@@ -18,13 +18,14 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
   selectedChatId,
   onChatSelect,
   currentUserId,
-  className = ""
+  className = "",
 }) => {
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
 
-  const filteredChats = chats.filter(chat => {
-    const otherUser = chat.participants.find(p => p.id !== currentUserId);
-    const fullName = `${otherUser?.firstName} ${otherUser?.lastName}`.toLowerCase();
+  const filteredChats = chats.filter((chat) => {
+    const otherUser = chat.participants.find((p) => p.id !== currentUserId);
+    const fullName =
+      `${otherUser?.firstName} ${otherUser?.lastName}`.toLowerCase();
     return fullName.includes(searchQuery.toLowerCase());
   });
 
@@ -35,24 +36,25 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
     const hours = Math.floor(diff / (1000 * 60 * 60));
     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
 
-    if (minutes < 1) return 'now';
+    if (minutes < 1) return "now";
     if (minutes < 60) return `${minutes}m`;
     if (hours < 24) return `${hours}h`;
     if (days < 7) return `${days}d`;
-    
-    return new Intl.DateTimeFormat('en-US', {
-      month: 'short',
-      day: 'numeric'
+
+    return new Intl.DateTimeFormat("en-US", {
+      month: "short",
+      day: "numeric",
     }).format(date);
   };
 
   const getOtherUser = (chat: Chat): ChatUser | undefined => {
-    return chat.participants.find(p => p.id !== currentUserId);
+    return chat.participants.find((p) => p.id !== currentUserId);
   };
 
   return (
-    <div className={`w-full sm:w-80 md:w-96 lg:w-[400px] border-r border-gray-200 bg-white flex flex-col h-full ${className}`}>
-      {/* Header */}
+    <div
+      className={`w-full sm:w-80 md:w-96 lg:w-[400px] border-r border-gray-200 bg-white flex flex-col h-full ${className}`}
+    >
       <div className="px-3 py-2 md:p-4 border-b border-gray-200 bg-white/95 backdrop-blur-sm flex items-center justify-between sticky top-0 z-10 flex-shrink-0">
         <div className="relative flex-1 mr-3">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -72,17 +74,18 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
           </div>
         </div>
       </div>
-      
-      {/* Chat List */}
+
       <div className="flex-1 overflow-y-auto">
         {filteredChats.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full p-6 text-center">
             <MessageCircle className="w-12 h-12 text-gray-300 mb-3" />
             <p className="text-gray-500 text-sm">
-              {searchQuery ? 'No conversations found' : 'No messages yet'}
+              {searchQuery ? "No conversations found" : "No messages yet"}
             </p>
             <p className="text-gray-400 text-xs mt-1">
-              {searchQuery ? 'Try a different search term' : 'Start a conversation to see it here'}
+              {searchQuery
+                ? "Try a different search term"
+                : "Start a conversation to see it here"}
             </p>
           </div>
         ) : (
@@ -95,16 +98,17 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
                 key={chat.id}
                 onClick={() => onChatSelect(chat.id)}
                 className={`p-3 border-b border-gray-100 cursor-pointer transition-all duration-200 hover:bg-gray-50 relative group ${
-                  selectedChatId === chat.id ? 'bg-primary-50 border-l-4 border-l-primary-500' : ''
+                  selectedChatId === chat.id
+                    ? "bg-primary-50 border-l-4 border-l-primary-500"
+                    : ""
                 }`}
               >
                 <div className="flex items-center space-x-3">
-                  {/* Avatar */}
                   <div className="relative">
                     <div className="w-11 h-11 rounded-full bg-gradient-to-br from-primary-200 to-primary-300 flex items-center justify-center shadow-sm">
                       {otherUser.profilePicture ? (
-                        <Image 
-                          src={otherUser.profilePicture} 
+                        <Image
+                          src={otherUser.profilePicture}
                           alt={`${otherUser.firstName} ${otherUser.lastName}`}
                           width={44}
                           height={44}
@@ -112,7 +116,8 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
                         />
                       ) : (
                         <span className="font-semibold text-primary-700 text-sm">
-                          {otherUser.firstName[0]}{otherUser.lastName[0]}
+                          {otherUser.firstName[0]}
+                          {otherUser.lastName[0]}
                         </span>
                       )}
                     </div>
@@ -121,7 +126,6 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
                     )}
                   </div>
 
-                  {/* Content */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between mb-0.5">
                       <h3 className="font-semibold text-gray-800 truncate text-sm">
@@ -136,21 +140,20 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
 
                     <div className="flex items-center justify-between">
                       <p className="text-sm text-gray-600 truncate pr-2">
-                        {chat.lastMessage?.text || 'No messages yet'}
+                        {chat.lastMessage?.text || "No messages yet"}
                       </p>
                       {chat.unreadCount > 0 && (
                         <div className="bg-primary-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center flex-shrink-0 animate-pulse">
-                          {chat.unreadCount > 9 ? '9+' : chat.unreadCount}
+                          {chat.unreadCount > 9 ? "9+" : chat.unreadCount}
                         </div>
                       )}
                     </div>
 
-                    {/* Online Status Text */}
                     <p className="text-xs text-gray-400 mt-0.5">
                       {otherUser.isOnline ? (
                         <span className="text-green-500">Online now</span>
                       ) : (
-                        'Last seen recently'
+                        "Last seen recently"
                       )}
                     </p>
                   </div>

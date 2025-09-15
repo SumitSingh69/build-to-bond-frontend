@@ -1,7 +1,6 @@
 import { User } from "@/types/auth.types";
 import { LucideIcon } from "lucide-react";
 
-// Form data type for the edit profile modal
 export interface EditProfileFormData extends Partial<User> {
   agePreferences?: {
     min: number;
@@ -20,7 +19,6 @@ export interface EditProfileFormData extends Partial<User> {
   };
 }
 
-// Handler types for form interactions
 export type FormFieldHandler = (
   field: keyof User,
   value: string | number | boolean | undefined
@@ -34,14 +32,12 @@ export type NestedFieldHandler = (
 
 export type AgeRangeHandler = (values: number[]) => void;
 
-// Base props for all section components
 export interface BaseSectionProps {
   formData: EditProfileFormData;
   onFieldChange: FormFieldHandler;
   onNestedFieldChange: NestedFieldHandler;
 }
 
-// Section header props
 export interface SectionHeaderProps {
   icon: LucideIcon;
   title: string;
@@ -49,7 +45,6 @@ export interface SectionHeaderProps {
   iconClassName?: string;
 }
 
-// Specific section props
 export interface BasicInformationSectionProps extends BaseSectionProps {
   getBioCharCount: () => number;
 }
