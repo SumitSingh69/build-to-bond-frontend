@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { X, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { apiRequest } from "@/lib/api";
 
 interface Question {
   question: string;
@@ -178,6 +179,8 @@ const OceanModel: React.FC<OceanModelProps> = ({ isOpen, onClose }) => {
   const isLastQuestion = currentQuestionIndex === allQuestions.length - 1;
   const questionKey = `${currentQuestion?.category}-${currentQuestion?.index}`;
   const currentAnswer = answers[questionKey];
+  const totalQuestionsAnswered = Object.keys(answers).length;
+  const allQuestionsAnswered = totalQuestionsAnswered === allQuestions.length;
 
   const handleOptionSelect = (optionIndex: number) => {
     setAnswers((prev) => ({
@@ -202,13 +205,59 @@ const OceanModel: React.FC<OceanModelProps> = ({ isOpen, onClose }) => {
     setIsSubmitting(true);
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      // Convert answers from option indices to actual option text
+      const answersArray = Object.entries(answers).map(([questionKey, optionIndex]) => {
+        // Find the question to get the option text
+        const questionIndex = parseInt(questionKey.split('-')[1]);
+        const category = questionKey.split('-')[0];
+        
+        let question;
+        switch(category) {
+          case 'Openness':
+            question = oceanData.OCEAN_Questions.Openness[questionIndex];
+            break;
+          case 'Conscientiousness':
+            question = oceanData.OCEAN_Questions.Conscientiousness[questionIndex];
+            break;
+          case 'Extraversion':
+            question = oceanData.OCEAN_Questions.Extraversion[questionIndex];
+            break;
+          case 'Agreeableness':
+            question = oceanData.OCEAN_Questions.Agreeableness[questionIndex];
+            break;
+          case 'Neuroticism':
+            question = oceanData.OCEAN_Questions.Neuroticism[questionIndex];
+            break;
+          default:
+            return null;
+        }
+        
+        return question?.options[optionIndex];
+      }).filter(answer => answer !== null);
+
+      const data = await apiRequest('/users/personality-score', {
+        method: 'POST',
+        body: JSON.stringify({
+          answers: answersArray
+        }),
+      }) as {
+        success: boolean;
+        message?: string;
+        data?: Record<string, unknown>;
+      };
+
+      if (data.success) {
+        alert("Personality assessment completed successfully!");
+      } else {
+        throw new Error(data.message || 'Failed to submit assessment');
+      }
 
       setAnswers({});
       setCurrentQuestionIndex(0);
       onClose();
     } catch (error) {
       console.error("Error submitting OCEAN assessment:", error);
+      alert("Failed to submit assessment. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -233,6 +282,11 @@ const OceanModel: React.FC<OceanModelProps> = ({ isOpen, onClose }) => {
               </h2>
               <p className="text-xs text-muted-foreground mt-1">
                 Question {currentQuestionIndex + 1} of {allQuestions.length}
+                {totalQuestionsAnswered > 0 && (
+                  <span className="ml-2 text-primary">
+                    ({totalQuestionsAnswered} answered)
+                  </span>
+                )}
               </p>
             </div>
             <Button
@@ -335,8 +389,8 @@ const OceanModel: React.FC<OceanModelProps> = ({ isOpen, onClose }) => {
               ) : (
                 <Button
                   onClick={handleSubmit}
-                  disabled={currentAnswer === undefined || isSubmitting}
-                  className="flex items-center gap-2 bg-gradient-to-r from-primary to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white"
+                  disabled={!allQuestionsAnswered || isSubmitting}
+                  className="flex items-center gap-2 bg-gradient-to-r from-primary to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white disabled:opacity-50 disabled:cursor-not-allowed"
                   size="sm"
                 >
                   {isSubmitting ? (
@@ -344,8 +398,10 @@ const OceanModel: React.FC<OceanModelProps> = ({ isOpen, onClose }) => {
                       <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white" />
                       Submitting...
                     </>
-                  ) : (
+                  ) : allQuestionsAnswered ? (
                     "Complete Test"
+                  ) : (
+                    `Answer all questions (${totalQuestionsAnswered}/${allQuestions.length})`
                   )}
                 </Button>
               )}

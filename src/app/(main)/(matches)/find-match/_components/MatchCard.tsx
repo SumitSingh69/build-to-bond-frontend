@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Heart, X, MapPin, Briefcase, GraduationCap, Star } from "lucide-react";
+import { Heart, X, MapPin, Briefcase, GraduationCap } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -62,14 +62,14 @@ const MatchCard: React.FC<MatchCardProps> = ({
           </AvatarFallback>
         </Avatar>
 
-        {user.compatibility && (
+        {/* {user.compatibility && (
           <div className="absolute top-4 right-4">
             <Badge className="bg-green-100 text-green-700 border-green-200 flex items-center gap-1">
               <Star className="w-3 h-3 fill-current" />
               {user.compatibility}% Match
             </Badge>
           </div>
-        )}
+        )} */}
       </div>
 
       <div className="p-6">

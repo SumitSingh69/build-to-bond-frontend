@@ -1,17 +1,58 @@
 "use client";
 
-import React, { useState } from "react";
-import { MatchHeader, MatchFallback, MatchCard, MatchFilterSheet } from "./_components";
+import React, { useState, useEffect } from "react";
+import Confetti from "react-confetti";
+import {
+  MatchHeader,
+  MatchFallback,
+  MatchCard,
+  MatchFilterSheet,
+  RecommendedCarousel,
+  SearchBar,
+  MatchNotification,
+} from "./_components";
 import { UserDetailSheet } from "./_components/UserDetailSheet";
 import { useMatchFinder } from "@/hooks/useMatchFinder";
+import { useMatch } from "@/hooks/useMatch";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+import { MatchUser } from "./types";
 
 const FindMatchPage = () => {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [isUserDetailOpen, setIsUserDetailOpen] = useState(false);
+  const [isMatchNotificationOpen, setIsMatchNotificationOpen] = useState(false);
+  const [matchedUser, setMatchedUser] = useState<MatchUser | null>(null);
+
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [windowDimensions, setWindowDimensions] = useState({
+    width: 0,
+    height: 0,
+  });
+
+  useEffect(() => {
+    const updateDimensions = () => {
+      setWindowDimensions({
+        width: window.innerWidth,
+        height: window.innerHeight,
+      });
+    };
+
+    updateDimensions();
+    window.addEventListener("resize", updateDimensions);
+    return () => window.removeEventListener("resize", updateDimensions);
+  }, []);
+
+  const triggerConfetti = () => {
+    setShowConfetti(true);
+
+    setTimeout(() => setShowConfetti(false), 3000);
+  };
+
   const {
     matches,
+    recommendedMatches,
     loading,
     error,
     filters,
@@ -23,6 +64,13 @@ const FindMatchPage = () => {
     applyFilters,
     clearFilters,
   } = useMatchFinder();
+
+  const {
+    likeUser,
+    passUser,
+    superLikeUser,
+    clearError: clearMatchError,
+  } = useMatch();
 
   const handleFilterClick = () => {
     setIsFilterOpen(true);
@@ -44,6 +92,133 @@ const FindMatchPage = () => {
   const handleCloseUserDetail = () => {
     setIsUserDetailOpen(false);
     setSelectedUserId(null);
+  };
+
+  const handleEnhancedLike = async (userId: string) => {
+    try {
+      clearMatchError();
+      const result = await likeUser(userId);
+
+      if (result?.isMatch) {
+        const user =
+          matches.find((m) => m._id === userId) ||
+          recommendedMatches.find((m) => m._id === userId);
+
+        if (user) {
+          setMatchedUser(user);
+          setIsMatchNotificationOpen(true);
+        }
+
+        triggerConfetti();
+
+        toast.success("🎉 It's a Match!", {
+          description: "You both liked each other! Start a conversation.",
+          duration: 5000,
+        });
+      } else {
+        triggerConfetti();
+
+        toast.success("❤️ Liked!", {
+          description: "Your like has been sent.",
+          duration: 3000,
+        });
+      }
+
+      handleLike(userId);
+    } catch (error) {
+      console.error("Failed to like user:", error);
+      toast.error("Failed to like user", {
+        description: "Please try again later.",
+        duration: 4000,
+      });
+    }
+  };
+
+  const handleEnhancedPass = async (userId: string) => {
+    try {
+      clearMatchError();
+      await passUser(userId);
+
+      toast.info("👋 Passed", {
+        description: "You passed on this user.",
+        duration: 2000,
+      });
+
+      handlePass(userId);
+    } catch (error) {
+      console.error("Failed to pass user:", error);
+      toast.error("Failed to pass user", {
+        description: "Please try again later.",
+        duration: 4000,
+      });
+    }
+  };
+
+  // const handleSuperLike = async (userId: string) => {
+  //   try {
+  //     clearMatchError();
+  //     const result = await superLikeUser(userId);
+
+  //     if (result?.isMatch) {
+  //       const user =
+  //         matches.find((m) => m._id === userId) ||
+  //         recommendedMatches.find((m) => m._id === userId);
+
+  //       if (user) {
+  //         setMatchedUser(user);
+  //         setIsMatchNotificationOpen(true);
+  //       }
+
+  //       triggerConfetti();
+
+  //       toast.success("🌟 Super Match!", {
+  //         description: "You both super liked each other!",
+  //         duration: 5000,
+  //       });
+  //     } else {
+  //       triggerConfetti();
+
+  //       toast.success("⭐ Super Liked!", {
+  //         description: "Your super like has been sent.",
+  //         duration: 3000,
+  //       });
+  //     }
+
+  //     if (handleLike) {
+  //       handleLike(userId);
+  //     }
+  //   } catch (error) {
+  //     console.error("Failed to super like user:", error);
+  //     toast.error("Failed to super like user", {
+  //       description: "Please try again later.",
+  //       duration: 4000,
+  //     });
+  //   }
+  // };
+
+  const handleCloseMatchNotification = () => {
+    setIsMatchNotificationOpen(false);
+    setMatchedUser(null);
+  };
+
+  const handleSendMessage = () => {
+    if (matchedUser) {
+      toast.success("💬 Opening chat...", {
+        description: `Starting conversation with ${matchedUser.firstName}`,
+        duration: 3000,
+      });
+
+      console.log("Navigate to chat with:", matchedUser._id);
+    }
+    handleCloseMatchNotification();
+  };
+
+  const handleKeepSwiping = () => {
+    toast.info("🔥 Keep swiping!", {
+      description: "Find more amazing people to connect with.",
+      duration: 2000,
+    });
+    handleCloseMatchNotification();
   };
 
   if (loading && matches.length === 0) {
@@ -101,16 +276,49 @@ const FindMatchPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Confetti Animation */}
+      {showConfetti && (
+        <Confetti
+          width={windowDimensions.width}
+          height={windowDimensions.height}
+          numberOfPieces={200}
+          gravity={0.3}
+          colors={['#ff69b4', '#ff1493', '#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57']}
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            zIndex: 9999,
+            pointerEvents: 'none'
+          }}
+        />
+      )}
+      
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <MatchHeader onFilterClick={handleFilterClick} />
+
+        {/* Search Bar */}
+        <SearchBar
+          onUserClick={handleUserClick}
+          onLike={handleEnhancedLike}
+          onPass={handleEnhancedPass}
+        />
+
+        {/* AI Recommended Users Carousel */}
+        <RecommendedCarousel
+          recommendedUsers={recommendedMatches}
+          onUserClick={handleUserClick}
+          onLike={handleEnhancedLike}
+          onPass={handleEnhancedPass}
+        />
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {matches.map((match, index) => (
             <MatchCard
               key={match._id}
               user={match}
-              onLike={handleLike}
-              onPass={handlePass}
+              onLike={handleEnhancedLike}
+              onPass={handleEnhancedPass}
               onUserClick={handleUserClick}
               className={`transform transition-all duration-300 ${
                 index === 0 ? "scale-100" : "scale-95 opacity-80"
@@ -162,6 +370,14 @@ const FindMatchPage = () => {
         onClose={handleCloseUserDetail}
         onLike={handleLike}
         onPass={handlePass}
+      />
+
+      <MatchNotification
+        isOpen={isMatchNotificationOpen}
+        onClose={handleCloseMatchNotification}
+        matchedUser={matchedUser}
+        onSendMessage={handleSendMessage}
+        onKeepSwiping={handleKeepSwiping}
       />
     </div>
   );

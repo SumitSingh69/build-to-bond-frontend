@@ -21,6 +21,7 @@ interface FetchUsersResponse {
   success: boolean;
   message: string;
   data: BackendUser[];
+  recommended: BackendUser[]; // Add recommended users
   page: number;
   limit: number;
   totalPages: number;
@@ -33,6 +34,7 @@ interface FetchUsersResponse {
 
 export const useMatchFinder = () => {
   const [matches, setMatches] = useState<MatchUser[]>([]);
+  const [recommendedMatches, setRecommendedMatches] = useState<MatchUser[]>([]); // Add recommended state
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [filters, setFilters] = useState<MatchFilters>({});
@@ -191,11 +193,14 @@ export const useMatchFinder = () => {
 
         if (response.success) {
           const transformedUsers = response.data.map(transformBackendUser);
+          const transformedRecommended = response.recommended?.map(transformBackendUser) || [];
 
           if (page === 1) {
             setMatches(transformedUsers);
+            setRecommendedMatches(transformedRecommended); // Set recommended users
           } else {
             setMatches((prev) => [...prev, ...transformedUsers]);
+            // Don't append recommended on pagination, keep only from first page
           }
 
           setPagination({
@@ -262,6 +267,7 @@ export const useMatchFinder = () => {
 
   return {
     matches,
+    recommendedMatches, // Add recommended matches to return
     loading,
     error,
     filters,

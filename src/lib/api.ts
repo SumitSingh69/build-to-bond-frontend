@@ -1,37 +1,44 @@
 import Cookies from "js-cookie";
-import config from './config';
-import { User } from '@/types/auth.types';
+import config from "./config";
+import { User } from "@/types/auth.types";
 
 const API_BASE_URL = config.apiBaseUrl;
 
-// Global variables to prevent multiple simultaneous refresh attempts
 let isRefreshing = false;
 let refreshPromise: Promise<boolean> | null = null;
 
 const getAuthToken = (): string | null => {
   if (typeof window !== "undefined") {
-    return localStorage.getItem("authToken") || Cookies.get("authToken") || null;
+    return (
+      localStorage.getItem("authToken") || Cookies.get("authToken") || null
+    );
   }
   return null;
 };
 
 const getRefreshToken = (): string | null => {
   if (typeof window !== "undefined") {
-    return localStorage.getItem("refreshToken") || Cookies.get("refreshToken") || null;
+    return (
+      localStorage.getItem("refreshToken") ||
+      Cookies.get("refreshToken") ||
+      null
+    );
   }
   return null;
 };
 
-const setAuthTokens = (accessToken: string, refreshToken: string, user?: User) => {
+const setAuthTokens = (
+  accessToken: string,
+  refreshToken: string,
+  user?: User
+) => {
   if (typeof window !== "undefined") {
-    // Store in both localStorage and cookies for redundancy
     localStorage.setItem("authToken", accessToken);
     localStorage.setItem("refreshToken", refreshToken);
-    
-    Cookies.set("authToken", accessToken, { expires: 1 }); // 1 day
-    Cookies.set("refreshToken", refreshToken, { expires: 7 }); // 7 days
-    
-    // Update user data if provided
+
+    Cookies.set("authToken", accessToken, { expires: 1 });
+    Cookies.set("refreshToken", refreshToken, { expires: 7 });
+
     if (user) {
       localStorage.setItem("user", JSON.stringify(user));
       localStorage.setItem("userId", user._id);
@@ -47,7 +54,7 @@ const clearAuthTokens = () => {
     localStorage.removeItem("refreshToken");
     localStorage.removeItem("user");
     localStorage.removeItem("userId");
-    
+
     Cookies.remove("authToken");
     Cookies.remove("refreshToken");
     Cookies.remove("user");
@@ -57,17 +64,16 @@ const clearAuthTokens = () => {
 
 const isTokenExpired = (token: string): boolean => {
   try {
-    const payload = JSON.parse(atob(token.split('.')[1]));
+    const payload = JSON.parse(atob(token.split(".")[1]));
     const currentTime = Math.floor(Date.now() / 1000);
-    // Check if token expires in the next 5 minutes (300 seconds)
-    return payload.exp < (currentTime + 300);
+
+    return payload.exp < currentTime + 300;
   } catch {
     return true;
   }
 };
 
 const refreshAccessToken = async (): Promise<boolean> => {
-  // Prevent multiple simultaneous refresh attempts
   if (isRefreshing) {
     if (refreshPromise) {
       return refreshPromise;
@@ -91,15 +97,20 @@ const refreshAccessToken = async (): Promise<boolean> => {
       if (response.ok) {
         const data = await response.json();
         if (data.success && data.data.accessToken && data.data.refreshToken) {
-          setAuthTokens(data.data.accessToken, data.data.refreshToken, data.data.user);
-          
-          // Trigger a custom event to notify AuthContext of token refresh
+          setAuthTokens(
+            data.data.accessToken,
+            data.data.refreshToken,
+            data.data.user
+          );
+
           if (typeof window !== "undefined") {
-            window.dispatchEvent(new CustomEvent('tokenRefreshed', { 
-              detail: { user: data.data.user } 
-            }));
+            window.dispatchEvent(
+              new CustomEvent("tokenRefreshed", {
+                detail: { user: data.data.user },
+              })
+            );
           }
-          
+
           return true;
         }
       }
@@ -139,7 +150,6 @@ export const apiRequest = async <T = unknown>(
 ): Promise<T> => {
   const url = `${API_BASE_URL}${endpoint}`;
 
-  // Check if token is expired before making request
   if (includeAuth && typeof window !== "undefined") {
     const token = getAuthToken();
     if (token && isTokenExpired(token)) {
@@ -163,14 +173,18 @@ export const apiRequest = async <T = unknown>(
     },
   });
 
-  // Handle 401 Unauthorized - try to refresh token
-  if (response.status === 401 && includeAuth && retryOnUnauthorized && typeof window !== "undefined") {
+  if (
+    response.status === 401 &&
+    includeAuth &&
+    retryOnUnauthorized &&
+    typeof window !== "undefined"
+  ) {
     console.log("Received 401, attempting token refresh...");
     const refreshSuccess = await refreshAccessToken();
-    
+
     if (refreshSuccess) {
       console.log("Token refresh successful, retrying original request...");
-      // Retry the original request with new token
+
       response = await fetch(url, {
         ...options,
         headers: {
@@ -180,7 +194,7 @@ export const apiRequest = async <T = unknown>(
       });
     } else {
       console.log("Token refresh failed, redirecting to login...");
-      // Refresh failed, clear auth and redirect
+
       clearAuthTokens();
       if (window.location.pathname !== "/login") {
         window.location.href = "/login";
@@ -198,19 +212,23 @@ export const apiRequest = async <T = unknown>(
     }
 
     let errorMessage = "An error occurred";
-    let errorData: { errorCode?: string; errors?: unknown; message?: string; error?: string } | null = null;
-    
+    let errorData: {
+      errorCode?: string;
+      errors?: unknown;
+      message?: string;
+      error?: string;
+    } | null = null;
+
     try {
       errorData = await response.json();
-      
-      
+
       if (errorData?.errorCode === "VALIDATION_ERROR" && errorData.errors) {
         return {
           success: false,
           error: true,
           errorCode: "VALIDATION_ERROR",
           errors: errorData.errors,
-          message: errorData.message || "Validation failed"
+          message: errorData.message || "Validation failed",
         } as T;
       } else {
         errorMessage = errorData?.message || errorData?.error || errorMessage;
@@ -218,7 +236,7 @@ export const apiRequest = async <T = unknown>(
     } catch {
       errorMessage = response.statusText || errorMessage;
     }
-    
+
     throw new Error(errorMessage);
   }
 
@@ -299,9 +317,65 @@ export const authAPI = {
         body: JSON.stringify({ refreshToken }),
       },
       false,
-      false // Don't retry on unauthorized for refresh token endpoint
+      false
+    ),
+
+  searchUsers: (name: string, page = 1, limit = 10) =>
+    apiRequest(
+      `/users/search?name=${encodeURIComponent(
+        name
+      )}&page=${page}&limit=${limit}`,
+      {
+        method: "GET",
+      }
     ),
 };
 
-const apiModule = { apiRequest };
+export const matchAPI = {
+  recordAction: (
+    targetUserId: string,
+    action: "like" | "pass" | "super_like"
+  ) =>
+    apiRequest("/matches/action", {
+      method: "POST",
+      body: JSON.stringify({ targetUserId, action }),
+    }),
+
+  likeUser: (targetUserId: string) =>
+    apiRequest(`/matches/like/${targetUserId}`, {
+      method: "POST",
+    }),
+
+  passUser: (targetUserId: string) =>
+    apiRequest(`/matches/pass/${targetUserId}`, {
+      method: "POST",
+    }),
+
+  superLikeUser: (targetUserId: string) =>
+    apiRequest(`/matches/super-like/${targetUserId}`, {
+      method: "POST",
+    }),
+
+  getMatches: (page = 1, limit = 20) =>
+    apiRequest(`/matches?page=${page}&limit=${limit}`, {
+      method: "GET",
+    }),
+
+  getMatchHistory: (page = 1, limit = 20) =>
+    apiRequest(`/matches/history?page=${page}&limit=${limit}`, {
+      method: "GET",
+    }),
+
+  getLikes: (page = 1, limit = 20) =>
+    apiRequest(`/matches/likes?page=${page}&limit=${limit}`, {
+      method: "GET",
+    }),
+
+  checkUserAction: (targetUserId: string) =>
+    apiRequest(`/matches/check/${targetUserId}`, {
+      method: "GET",
+    }),
+};
+
+const apiModule = { apiRequest, authAPI, matchAPI };
 export default apiModule;
