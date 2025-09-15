@@ -176,7 +176,7 @@ const ChatPage: React.FC = () => {
         );
       }
     }
-  }, [onlineUsers]); // Removed chatUser from dependencies to prevent infinite loop
+  }, [onlineUsers, chatUser]); // chatUser added back since we now check if status actually changed
 
   useEffect(() => {
     const checkMobile = () => {

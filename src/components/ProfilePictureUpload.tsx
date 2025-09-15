@@ -3,7 +3,7 @@
 import React, { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Camera, Upload, X, User } from "lucide-react";
+import { Camera, Upload, X } from "lucide-react";
 import { toast } from "sonner";
 
 interface ProfilePictureUploadProps {

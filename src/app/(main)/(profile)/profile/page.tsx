@@ -131,7 +131,7 @@ function ProfilePageContent() {
         setIsLoading(false);
       }
     },
-    [user]
+    [user, updateAuthProfile]
   );
 
   useEffect(() => {
@@ -139,7 +139,7 @@ function ProfilePageContent() {
       hasRefreshed.current = true;
       handleRefreshProfile(true);
     }
-  }, [dataLoaded, handleRefreshProfile]);
+  }, [user, loading, dataLoaded, handleRefreshProfile]);
 
   const handleProfileSave = async (
     updatedData: Partial<User>,
@@ -170,7 +170,14 @@ function ProfilePageContent() {
         response = (await apiModule.authAPI.updateProfile(
           updatePayload,
           profilePicture
-        )) as any;
+        )) as {
+          success: boolean;
+          data?: { user: User };
+          error?: boolean;
+          errorCode?: string;
+          errors?: Array<{ field: string; message: string }>;
+          message?: string;
+        };
       } else {
         response = await apiRequest<{
           success: boolean;

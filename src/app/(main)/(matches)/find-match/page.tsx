@@ -68,7 +68,6 @@ const FindMatchPage = () => {
   const {
     likeUser,
     passUser,
-    superLikeUser,
     clearError: clearMatchError,
   } = useMatch();
 

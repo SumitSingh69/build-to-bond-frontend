@@ -16,13 +16,22 @@ import { useAuth } from '@/context/AuthContext'
 interface ProfileDropdownProps {
   name: string
   email: string
-  src?: string
+  src?: string | { url: string; [key: string]: unknown }
   isOnline?: boolean
   className?: string
 }
 
 const ProfileDropdown = ({ name, email, src, isOnline = false, className }: ProfileDropdownProps) => {
   const { logout } = useAuth();
+
+  // Helper function to get avatar URL
+  const getAvatarUrl = (avatar?: string | { url: string; [key: string]: unknown }): string | undefined => {
+    if (typeof avatar === 'string') return avatar;
+    if (avatar && typeof avatar === 'object' && 'url' in avatar) return avatar.url;
+    return undefined;
+  };
+
+  const avatarUrl = getAvatarUrl(src);
   
   const initials = name
     .split(' ')
@@ -46,7 +55,7 @@ const ProfileDropdown = ({ name, email, src, isOnline = false, className }: Prof
         >
           <div className="relative">
             <Avatar className="w-8 h-8 border-2 border-primary-200 group-hover:border-primary-400 transition-colors">
-              <AvatarImage src={src} alt={name} />
+              <AvatarImage src={avatarUrl} alt={name} />
               <AvatarFallback className="bg-primary-100 text-primary-800 text-sm font-medium">
                 {initials}
               </AvatarFallback>
@@ -65,7 +74,7 @@ const ProfileDropdown = ({ name, email, src, isOnline = false, className }: Prof
         <div className="p-4 bg-gradient-to-r from-primary-50 to-primary-100 border-b border-border">
           <div className="flex items-center space-x-3">
             <Avatar className="w-12 h-12 border-2 border-primary-300">
-              <AvatarImage src={src} alt={name} />
+              <AvatarImage src={avatarUrl} alt={name} />
               <AvatarFallback className="bg-primary-200 text-primary-800 text-lg font-semibold">
                 {initials}
               </AvatarFallback>

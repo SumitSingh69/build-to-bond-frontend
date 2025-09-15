@@ -133,7 +133,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
     });
 
     setSocket(newSocket);
-  }, [user?._id]);
+  }, [user?._id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const disconnectSocket = useCallback(() => {
     setSocket((currentSocket) => {
@@ -157,7 +157,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
     return () => {
       disconnectSocket();
     };
-  }, [isAuthenticated, user?._id]);
+  }, [isAuthenticated, user?._id, connect, disconnectSocket]);
 
   const joinRoom = useCallback(
     (roomId: string) => {
