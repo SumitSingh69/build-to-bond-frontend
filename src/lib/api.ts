@@ -343,6 +343,39 @@ export const authAPI = {
         method: "GET",
       }
     ),
+
+  // Like/Crush/Match functionality
+  likeUser: (targetUserId: string) =>
+    apiRequest("/users/like", {
+      method: "POST",
+      body: JSON.stringify({ targetUserId }),
+    }),
+
+  unlikeUser: (targetUserId: string) =>
+    apiRequest("/users/unlike", {
+      method: "POST",
+      body: JSON.stringify({ targetUserId }),
+    }),
+
+  getLikes: () =>
+    apiRequest("/users/likes", {
+      method: "GET",
+    }),
+
+  getCrushes: () =>
+    apiRequest("/users/crushes", {
+      method: "GET",
+    }),
+
+  getMatches: () =>
+    apiRequest("/users/matches", {
+      method: "GET",
+    }),
+
+  checkLikeStatus: (targetUserId: string) =>
+    apiRequest(`/users/like-status/${targetUserId}`, {
+      method: "GET",
+    }),
 };
 
 export const matchAPI = {

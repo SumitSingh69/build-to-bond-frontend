@@ -6,8 +6,9 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Heart, MessageCircle, User, Star, Calendar } from 'lucide-react';
+import { Heart, MessageCircle, User, Star, Calendar, Users } from 'lucide-react';
 import { useMatch } from '@/hooks/useMatch';
+import LikesAndCrushes from './find-match/_components/LikesAndCrushes';
 
 import { MatchUser } from "./find-match/types";
 
@@ -158,9 +159,13 @@ const MatchesPage = () => {
       )}
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="matches">Mutual Matches ({matches.length})</TabsTrigger>
           <TabsTrigger value="likes">Likes ({likes.length})</TabsTrigger>
+          <TabsTrigger value="connections" className="flex items-center gap-2">
+            <Users className="w-4 h-4" />
+            Connections
+          </TabsTrigger>
           <TabsTrigger value="history">History ({matchHistory.length})</TabsTrigger>
         </TabsList>
 
@@ -286,6 +291,11 @@ const MatchesPage = () => {
               })}
             </div>
           )}
+        </TabsContent>
+
+        {/* Connections - Likes and Crushes */}
+        <TabsContent value="connections" className="mt-6">
+          <LikesAndCrushes />
         </TabsContent>
 
         {/* Match History */}

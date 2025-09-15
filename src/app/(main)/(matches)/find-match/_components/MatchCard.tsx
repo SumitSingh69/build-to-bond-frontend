@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Heart, X, MapPin, Briefcase, GraduationCap } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -8,6 +8,8 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { MatchCardProps } from "../types";
 import BioDisplay from "@/components/BioDisplay";
+import { useLike } from "@/hooks/useLike";
+import { toast } from "sonner";
 
 
 const MatchCard: React.FC<MatchCardProps> = ({
@@ -17,18 +19,60 @@ const MatchCard: React.FC<MatchCardProps> = ({
   onUserClick,
   className,
 }) => {
+  const [isPassing, setIsPassing] = useState(false);
+  const [isLiked, setIsLiked] = useState(false);
+  const { likeUser, loading: isLiking } = useLike();
+  
   const initials = `${user.firstName[0]}${user.lastName[0]}`.toUpperCase();
   const displayLocation =
     user.location?.city && user.location?.country
       ? `${user.location.city}, ${user.location.country}`
       : user.location?.city || user.location?.country || "";
 
-  const handleLike = () => {
-    onLike?.(user._id);
+  const handleLike = async () => {
+    if (isLiking || isLiked) return;
+    
+    console.log("Attempting to like user:", user._id);
+    
+    try {
+      const result = await likeUser(user._id);
+      console.log("Like result:", result);
+      
+      if (result?.success) {
+        setIsLiked(true);
+        console.log("Successfully liked user, updating UI state");
+        
+        // Call the original onLike callback if provided
+        onLike?.(user._id);
+      } else {
+        console.log("Like operation failed or returned false");
+      }
+    } catch (error) {
+      console.error("Failed to like user:", error);
+    }
   };
 
-  const handlePass = () => {
-    onPass?.(user._id);
+  const handlePass = async () => {
+    if (isPassing) return;
+    
+    setIsPassing(true);
+    try {
+      // For now, we'll just call the original onPass callback
+      toast.info("👋 Passed", {
+        description: "You passed on this user.",
+        duration: 2000,
+      });
+      
+      onPass?.(user._id);
+    } catch (error) {
+      console.error("Failed to pass user:", error);
+      toast.error("Failed to pass user", {
+        description: "Please try again later.",
+        duration: 4000,
+      });
+    } finally {
+      setIsPassing(false);
+    }
   };
 
   const handleCardClick = () => {
@@ -136,18 +180,25 @@ const MatchCard: React.FC<MatchCardProps> = ({
             variant="outline"
             size="lg"
             onClick={(e) => handleButtonClick(e, handlePass)}
-            className="flex-1 border-gray-300 text-gray-600 hover:border-red-300 hover:bg-red-50 hover:text-red-600 transition-colors"
+            disabled={isPassing}
+            className="flex-1 border-gray-300 text-gray-600 hover:border-red-300 hover:bg-red-50 hover:text-red-600 transition-colors disabled:opacity-50"
           >
             <X className="w-5 h-5 mr-2" />
-            Pass
+            {isPassing ? "Passing..." : "Pass"}
           </Button>
           <Button
             size="lg"
             onClick={(e) => handleButtonClick(e, handleLike)}
-            className="flex-1 bg-rose-500 hover:bg-rose-600 text-white shadow-md hover:shadow-lg transition-all"
+            disabled={isLiking || isLiked}
+            className={cn(
+              "flex-1 shadow-md hover:shadow-lg transition-all disabled:opacity-50",
+              isLiked 
+                ? "bg-green-500 hover:bg-green-600 text-white" 
+                : "bg-rose-500 hover:bg-rose-600 text-white"
+            )}
           >
-            <Heart className="w-5 h-5 mr-2" />
-            Like
+            <Heart className={cn("w-5 h-5 mr-2", isLiked && "fill-current")} />
+            {isLiking ? "Liking..." : isLiked ? "Liked!" : "Like"}
           </Button>
         </div>
       </div>
