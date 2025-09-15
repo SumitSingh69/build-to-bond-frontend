@@ -29,6 +29,7 @@ const CTAButtons: React.FC = () => {
         className="w-full sm:w-auto border-2 border-primary text-primary hover:bg-primary hover:text-white px-8 py-4 text-lg font-semibold transition-all duration-300"
         aria-label="Learn more about Soulara dating platform"
         type="button"
+        onClick={() => router.push('/about')}
         
       >
         Learn More

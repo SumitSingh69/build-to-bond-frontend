@@ -134,6 +134,7 @@ const HowItWorks: React.FC = () => {
                 size="lg"
                 className="border-2 border-primary text-primary hover:bg-primary hover:text-white font-sans px-10 py-4 text-lg font-semibold transition-all duration-300"
                 aria-label="Learn more about how Soulara works"
+                onClick={() => router.push('/about')}
               >
                 Learn More
               </Button>
