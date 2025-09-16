@@ -40,6 +40,23 @@ interface LikeStatusData {
   };
 }
 
+interface LikeResponse {
+  success: boolean;
+  message: string;
+  data: {
+    action: string;
+    targetUserId: string;
+    isMatch: boolean;
+    matchId?: string;
+  };
+}
+
+interface ApiResponse<T> {
+  success: boolean;
+  message: string;
+  data: T;
+}
+
 export const useLike = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -55,7 +72,7 @@ export const useLike = () => {
     console.log("useLike: Attempting to like user:", targetUserId);
 
     try {
-      const response = await apiModule.authAPI.likeUser(targetUserId) as any;
+      const response = await apiModule.authAPI.likeUser(targetUserId) as LikeResponse;
       console.log("useLike: API response:", response);
       
       if (response.success) {
@@ -104,7 +121,7 @@ export const useLike = () => {
     setError(null);
 
     try {
-      const response = await apiModule.authAPI.unlikeUser(targetUserId) as any;
+      const response = await apiModule.authAPI.unlikeUser(targetUserId) as LikeResponse;
       
       if (response.success) {
         toast.success("User unliked successfully");
@@ -133,7 +150,7 @@ export const useLike = () => {
     setError(null);
 
     try {
-      const response = await apiModule.authAPI.getLikes() as any;
+      const response = await apiModule.authAPI.getLikes() as ApiResponse<LikesData>;
       
       if (response.success) {
         return response.data;
@@ -156,7 +173,7 @@ export const useLike = () => {
     setError(null);
 
     try {
-      const response = await apiModule.authAPI.getCrushes() as any;
+      const response = await apiModule.authAPI.getCrushes() as ApiResponse<CrushesData>;
       
       if (response.success) {
         return response.data;
@@ -179,7 +196,7 @@ export const useLike = () => {
     setError(null);
 
     try {
-      const response = await apiModule.authAPI.getMatches() as any;
+      const response = await apiModule.authAPI.getMatches() as ApiResponse<MatchesData>;
       
       if (response.success) {
         return response.data;
@@ -202,7 +219,7 @@ export const useLike = () => {
     setError(null);
 
     try {
-      const response = await apiModule.authAPI.checkLikeStatus(targetUserId) as any;
+      const response = await apiModule.authAPI.checkLikeStatus(targetUserId) as ApiResponse<LikeStatusData>;
       
       if (response.success) {
         return response.data;

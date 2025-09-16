@@ -292,7 +292,7 @@ export const authAPI = {
       method: "GET",
     }),
 
-  updateProfile: (data: Record<string, unknown>, profilePicture?: File) => {
+  updateProfile: (data: Record<string, unknown>) => {
     // For now, only handle regular JSON update (no file uploads)
     console.log('Frontend API - updateProfile called with:', data);
     return apiRequest("/users/profile", {

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Heart, Users, Sparkles, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -35,6 +35,12 @@ interface MatchesData {
   totalMatches: number;
 }
 
+interface ApiResponse<T> {
+  success: boolean;
+  message: string;
+  data: T;
+}
+
 const LikesAndCrushes: React.FC = () => {
   const [likesData, setLikesData] = useState<LikesData | null>(null);
   const [crushesData, setCrushesData] = useState<CrushesData | null>(null);
@@ -44,7 +50,7 @@ const LikesAndCrushes: React.FC = () => {
 
   const fetchLikesData = async () => {
     try {
-      const response = await apiModule.authAPI.getLikes() as any;
+      const response = await apiModule.authAPI.getLikes() as ApiResponse<LikesData>;
       if (response.success) {
         setLikesData(response.data);
       }
@@ -56,7 +62,7 @@ const LikesAndCrushes: React.FC = () => {
 
   const fetchCrushesData = async () => {
     try {
-      const response = await apiModule.authAPI.getCrushes() as any;
+      const response = await apiModule.authAPI.getCrushes() as ApiResponse<CrushesData>;
       if (response.success) {
         setCrushesData(response.data);
       }
@@ -68,7 +74,7 @@ const LikesAndCrushes: React.FC = () => {
 
   const fetchMatchesData = async () => {
     try {
-      const response = await apiModule.authAPI.getMatches() as any;
+      const response = await apiModule.authAPI.getMatches() as ApiResponse<MatchesData>;
       if (response.success) {
         setMatchesData(response.data);
       }
@@ -78,7 +84,7 @@ const LikesAndCrushes: React.FC = () => {
     }
   };
 
-  const fetchAllData = async () => {
+  const fetchAllData = useCallback(async () => {
     setLoading(true);
     try {
       await Promise.all([
@@ -89,15 +95,15 @@ const LikesAndCrushes: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchAllData();
-  }, []);
+  }, [fetchAllData]);
 
   const handleLikeBack = async (userId: string) => {
     try {
-      const response = await apiModule.authAPI.likeUser(userId) as any;
+      const response = await apiModule.authAPI.likeUser(userId) as ApiResponse<{action: string; targetUserId: string; isMatch: boolean; matchId?: string}>;
       if (response.success) {
         if (response.data?.isMatch) {
           toast.success("🎉 It's a Match!", {
@@ -241,7 +247,7 @@ const LikesAndCrushes: React.FC = () => {
             <CardContent>
               {likesData?.likes.length === 0 ? (
                 <p className="text-center text-gray-500 py-4">
-                  You haven't liked anyone yet. Start exploring! 👀
+                  You haven&apos;t liked anyone yet. Start exploring! 👀
                 </p>
               ) : (
                 <div className="space-y-3">
