@@ -131,14 +131,37 @@ const LikesAndCrushes: React.FC = () => {
   }) => {
     const initials = `${user.firstName[0]}${user.lastName[0]}`.toUpperCase();
     
+    // Helper function to get avatar URL with Dicebear fallback
+    const getAvatarUrl = () => {
+      // Check for profile picture
+      if (user.profilePicture && user.profilePicture.trim()) {
+        return user.profilePicture;
+      }
+      
+      // Check for avatar field
+      if (user.avatar && user.avatar.trim()) {
+        return user.avatar;
+      }
+      
+      // Fallback to Dicebear avatar using name as seed
+      const seed = `${user.firstName}-${user.lastName}` || user._id || 'user';
+      return `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(seed)}`;
+    };
+    
     return (
       <Card className="w-full">
         <CardContent className="p-4">
           <div className="flex items-center gap-3">
             <Avatar className="w-12 h-12">
               <AvatarImage
-                src={user.profilePicture || user.avatar}
+                src={getAvatarUrl()}
                 alt={`${user.firstName} ${user.lastName}`}
+                onError={(e) => {
+                  // If image fails to load, fallback to Dicebear
+                  const target = e.target as HTMLImageElement;
+                  const seed = `${user.firstName}-${user.lastName}` || user._id || 'user';
+                  target.src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(seed)}`;
+                }}
               />
               <AvatarFallback className="bg-gradient-to-br from-pink-100 to-rose-200 text-gray-600 font-bold">
                 {initials}

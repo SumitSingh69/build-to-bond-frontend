@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { protocol } from "socket.io-client";
 
 const nextConfig: NextConfig = {
   // Enforce linting and type-checking during builds
@@ -29,7 +30,13 @@ const nextConfig: NextConfig = {
         hostname: 'i.pinimg.com',
         port: '',
         pathname: '/**',
-      }
+      },
+      {
+        protocol: 'https',
+        hostname: 'media.licdn.com',
+        port: '',
+        pathname: '/**',
+      },
     ],
     qualities: [75, 90, 100, 95],
     formats: ['image/webp', 'image/avif'],

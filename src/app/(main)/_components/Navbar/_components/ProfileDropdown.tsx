@@ -24,11 +24,21 @@ interface ProfileDropdownProps {
 const ProfileDropdown = ({ name, email, src, isOnline = false, className }: ProfileDropdownProps) => {
   const { logout } = useAuth();
 
-  // Helper function to get avatar URL
-  const getAvatarUrl = (avatar?: string | { url: string; [key: string]: unknown }): string | undefined => {
-    if (typeof avatar === 'string') return avatar;
-    if (avatar && typeof avatar === 'object' && 'url' in avatar) return avatar.url;
-    return undefined;
+  // Helper function to get avatar URL with Dicebear fallback
+  const getAvatarUrl = (avatar?: string | { url: string; [key: string]: unknown }): string => {
+    // Check for direct string URL
+    if (typeof avatar === 'string' && avatar.trim()) {
+      return avatar;
+    }
+    
+    // Check for object with url property
+    if (avatar && typeof avatar === 'object' && 'url' in avatar && avatar.url && avatar.url.trim()) {
+      return avatar.url;
+    }
+    
+    // Fallback to Dicebear avatar using email as seed
+    const seed = email || name.replace(/\s+/g, '-').toLowerCase() || 'user';
+    return `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(seed)}`;
   };
 
   const avatarUrl = getAvatarUrl(src);
@@ -55,7 +65,16 @@ const ProfileDropdown = ({ name, email, src, isOnline = false, className }: Prof
         >
           <div className="relative">
             <Avatar className="w-8 h-8 border-2 border-primary-200 group-hover:border-primary-400 transition-colors">
-              <AvatarImage src={avatarUrl} alt={name} />
+              <AvatarImage 
+                src={avatarUrl} 
+                alt={name}
+                onError={(e) => {
+                  // If image fails to load, fallback to Dicebear
+                  const target = e.target as HTMLImageElement;
+                  const seed = email || name.replace(/\s+/g, '-').toLowerCase() || 'user';
+                  target.src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(seed)}`;
+                }}
+              />
               <AvatarFallback className="bg-primary-100 text-primary-800 text-sm font-medium">
                 {initials}
               </AvatarFallback>

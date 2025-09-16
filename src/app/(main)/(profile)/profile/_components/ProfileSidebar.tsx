@@ -24,6 +24,27 @@ export default function ProfileSidebar({
 }: ProfileSidebarProps) {
   const [isUploading, setIsUploading] = useState(false);
 
+  // Helper function to get avatar URL with fallback
+  const getAvatarUrl = (profile: User) => {
+    // First check if there's a profile picture in DB
+    const profilePictureUrl = typeof profile.profilePicture === 'string' 
+      ? profile.profilePicture 
+      : profile.profilePicture?.url;
+    
+    if (profilePictureUrl && profilePictureUrl.trim()) {
+      return profilePictureUrl;
+    }
+    
+    // Fallback to avatar field if exists
+    if (profile.avatar && profile.avatar.trim()) {
+      return profile.avatar;
+    }
+    
+    // Generate Dicebear avatar using email as seed
+    const seed = profile.email || `${profile.firstName}-${profile.lastName}` || 'user';
+    return `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(seed)}`;
+  };
+
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -74,27 +95,23 @@ export default function ProfileSidebar({
         <div className="flex flex-col items-center mb-4 lg:mb-6">
           <div className="relative group">
             <div className="w-24 h-24 lg:w-32 lg:h-32 rounded-full border-4 border-primary-100 shadow-lg overflow-hidden bg-gradient-to-br from-primary-200 to-primary-300 flex items-center justify-center">
-              {(typeof profile.profilePicture === 'string' ? profile.profilePicture : profile.profilePicture?.url) ? (
-                <Image
-                  src={typeof profile.profilePicture === 'string' ? profile.profilePicture : profile.profilePicture?.url || ''}
-                  alt={
-                    `${profile.firstName || ""} ${
-                      profile.lastName || ""
-                    }`.trim() || "Profile picture"
-                  }
-                  width={128}
-                  height={128}
-                  className="w-full h-full object-cover rounded-full"
-                />
-              ) : (
-                <span className="text-xl lg:text-2xl font-semibold text-primary-700">
-                  {getInitials(
-                    `${profile.firstName || ""} ${
-                      profile.lastName || ""
-                    }`.trim() || "User"
-                  )}
-                </span>
-              )}
+              <Image
+                src={getAvatarUrl(profile)}
+                alt={
+                  `${profile.firstName || ""} ${
+                    profile.lastName || ""
+                  }`.trim() || "Profile picture"
+                }
+                width={128}
+                height={128}
+                className="w-full h-full object-cover rounded-full"
+                onError={(e) => {
+                  // If image fails to load, fallback to Dicebear
+                  const target = e.target as HTMLImageElement;
+                  const seed = profile.email || `${profile.firstName}-${profile.lastName}` || 'user';
+                  target.src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(seed)}`;
+                }}
+              />
             </div>
 
             <label

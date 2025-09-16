@@ -127,10 +127,12 @@ const refreshAccessToken = async (): Promise<boolean> => {
   return result;
 };
 
-const createHeaders = (includeAuth: boolean = true, isFormData: boolean = false): HeadersInit => {
+const createHeaders = (
+  includeAuth: boolean = true,
+  isFormData: boolean = false
+): HeadersInit => {
   const headers: HeadersInit = {};
 
-  // Only set Content-Type for non-FormData requests
   if (!isFormData) {
     headers["Content-Type"] = "application/json";
   }
@@ -152,8 +154,7 @@ export const apiRequest = async <T = unknown>(
   retryOnUnauthorized: boolean = true
 ): Promise<T> => {
   const url = `${API_BASE_URL}${endpoint}`;
-  
-  // Check if the body is FormData
+
   const isFormData = options.body instanceof FormData;
 
   if (includeAuth && typeof window !== "undefined") {
@@ -293,8 +294,7 @@ export const authAPI = {
     }),
 
   updateProfile: (data: Record<string, unknown>) => {
-    // For now, only handle regular JSON update (no file uploads)
-    console.log('Frontend API - updateProfile called with:', data);
+    console.log("Frontend API - updateProfile called with:", data);
     return apiRequest("/users/profile", {
       method: "PUT",
       body: JSON.stringify(data),
@@ -344,7 +344,6 @@ export const authAPI = {
       }
     ),
 
-  // Like/Crush/Match functionality
   likeUser: (targetUserId: string) =>
     apiRequest("/users/like", {
       method: "POST",
@@ -424,5 +423,48 @@ export const matchAPI = {
     }),
 };
 
-const apiModule = { apiRequest, authAPI, matchAPI };
+export const statsAPI = {
+  getDashboard: () =>
+    apiRequest("/stats/dashboard", {
+      method: "GET",
+    }),
+
+  getOverview: () =>
+    apiRequest("/stats/overview", {
+      method: "GET",
+    }),
+
+  getWeeklyActivity: () =>
+    apiRequest("/stats/weekly-activity", {
+      method: "GET",
+    }),
+
+  getMonthlyTrends: () =>
+    apiRequest("/stats/monthly-trends", {
+      method: "GET",
+    }),
+
+  getInsights: () =>
+    apiRequest("/stats/insights", {
+      method: "GET",
+    }),
+
+  getActivityPattern: () =>
+    apiRequest("/stats/activity-pattern", {
+      method: "GET",
+    }),
+
+  recordActivity: (activityType: string, data?: any) =>
+    apiRequest("/stats/record-activity", {
+      method: "POST",
+      body: JSON.stringify({ activityType, data }),
+    }),
+
+  triggerAggregation: () =>
+    apiRequest("/stats/aggregate", {
+      method: "POST",
+    }),
+};
+
+const apiModule = { apiRequest, authAPI, matchAPI, statsAPI };
 export default apiModule;

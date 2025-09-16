@@ -44,10 +44,18 @@ interface LikeResponse {
   success: boolean;
   message: string;
   data: {
-    action: string;
-    targetUserId: string;
+    action?: string;
+    targetUserId?: string;
     isMatch: boolean;
     matchId?: string;
+    liked?: boolean;
+    alreadyLiked?: boolean;
+    targetUser?: {
+      _id: string;
+      firstName: string;
+      lastName: string;
+      profilePicture?: string;
+    };
   };
 }
 
@@ -78,7 +86,13 @@ export const useLike = () => {
       if (response.success) {
         console.log("useLike: Success! Match status:", response.data?.isMatch);
         
-        if (response.data?.isMatch) {
+        // Handle already liked case
+        if (response.data?.alreadyLiked) {
+          toast.info("💙 Already Liked", {
+            description: "You've already liked this user.",
+            duration: 3000,
+          });
+        } else if (response.data?.isMatch) {
           toast.success("🎉 It's a Match!", {
             description: "You both liked each other! Start a conversation.",
             duration: 5000,

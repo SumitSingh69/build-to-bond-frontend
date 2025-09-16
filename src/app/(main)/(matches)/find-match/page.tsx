@@ -13,7 +13,7 @@ import {
 } from "./_components";
 import { UserDetailSheet } from "./_components/UserDetailSheet";
 import { useMatchFinder } from "@/hooks/useMatchFinder";
-import { useMatch } from "@/hooks/useMatch";
+import { useLike } from "@/hooks/useLike";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { MatchUser } from "./types";
@@ -67,9 +67,8 @@ const FindMatchPage = () => {
 
   const {
     likeUser,
-    passUser,
     clearError: clearMatchError,
-  } = useMatch();
+  } = useLike();
 
   const handleFilterClick = () => {
     setIsFilterOpen(true);
@@ -136,8 +135,7 @@ const FindMatchPage = () => {
   const handleEnhancedPass = async (userId: string) => {
     try {
       clearMatchError();
-      await passUser(userId);
-
+      
       toast.info("👋 Passed", {
         description: "You passed on this user.",
         duration: 2000,
