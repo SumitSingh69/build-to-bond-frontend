@@ -99,7 +99,7 @@ export default function EditProfileSheet({
     setFormData((prev) => ({
       ...prev,
       [section]: {
-        ...(prev[section] as any),
+        ...(prev[section] as Record<string, unknown>),
         [field]: value,
       },
     }));

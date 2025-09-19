@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import Confetti from "react-confetti";
 import {
   MatchHeader,
@@ -21,7 +21,6 @@ import { MatchUser } from "./types";
 
 const FindMatchPage = () => {
   const searchParams = useSearchParams();
-  const router = useRouter();
   const userIdFromQuery = searchParams.get("userId");
 
   const [isFilterOpen, setIsFilterOpen] = useState(false);

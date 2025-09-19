@@ -23,43 +23,87 @@ import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from '
 import { BarChart, Bar, PieChart as RechartsPieChart, Cell, LineChart, Line, ResponsiveContainer, XAxis, YAxis, Tooltip, Pie } from 'recharts';
 import { useLike } from '@/hooks/useLike';
 import { useStats } from '@/hooks/useStats';
-import { format, subDays} from 'date-fns';
+import { format } from 'date-fns';
 import apiModule from '@/lib/api';
+
+// Define interfaces for type safety
+interface UserData {
+  _id?: string;
+  id?: string;
+  firstName?: string;
+  lastName?: string;
+  profilePicture?: string;
+  avatar?: string;
+  age?: number;
+  location?: string;
+  isMatch?: boolean;
+}
+
+interface ChatRoom {
+  otherUser?: UserData;
+  lastMessage?: {
+    content?: string;
+    createdAt?: string;
+  };
+  unreadCount?: number;
+}
+
+interface DashboardData {
+  stats: {
+    totalLikesGiven?: number;
+    totalLikesReceived?: number;
+    totalMatches?: number;
+    totalProfileViews?: number;
+    totalMessagesExchanged?: number;
+    matchRate?: number;
+    responseRate?: number;
+    engagementScore?: number;
+    profileCompleteness?: number;
+    chatInitiationRate?: number;
+    avgChatLength?: number;
+  };
+  weeklyActivity?: Array<{
+    displayDate: string;
+    likes: number;
+    matches: number;
+  }>;
+  insights?: {
+    profileCompleteness?: number;
+    recommendations?: Array<{
+      title: string;
+      description: string;
+      priority?: 'high' | 'medium' | 'low';
+    }>;
+  };
+}
 
 const UserStatsPage = () => {
   const router = useRouter();
   const {
     getLikes,
     getCrushes,
-    getMatches,
-    loading: likesLoading,
-    error: likesError
+    getMatches
   } = useLike();
 
   const {
-    getDashboard,
-    loading: statsLoading,
-    error: statsError,
-    clearError
+    getDashboard
   } = useStats();
 
-  const [dashboardData, setDashboardData] = useState<any>(null);
+  const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
   const [activeTab, setActiveTab] = useState('overview');
   
   // Separate state for different data types
-  const [likesData, setLikesData] = useState<any[]>([]);
-  const [crushesData, setCrushesData] = useState<any[]>([]);
-  const [matchesData, setMatchesData] = useState<any[]>([]);
-  const [whoLikesYouData, setWhoLikesYouData] = useState<any[]>([]);
-  const [chatRooms, setChatRooms] = useState<any[]>([]);
-  const [matchHistory, setMatchHistory] = useState<any[]>([]);
+  const [crushesData, setCrushesData] = useState<UserData[]>([]);
+  const [matchesData, setMatchesData] = useState<UserData[]>([]);
+  const [whoLikesYouData, setWhoLikesYouData] = useState<UserData[]>([]);
+  const [chatRooms, setChatRooms] = useState<ChatRoom[]>([]);
   
   const [loading, setLoading] = useState(true);
 
   // Fetch chat rooms data
   const fetchChatRooms = async () => {
     try {
-      const response = await apiModule.chatAPI.getAllChats() as any;
+      const response = await apiModule.chatAPI.getAllChats() as { success: boolean; chats: ChatRoom[] };
       if (response.success) {
         setChatRooms(response.chats || []);
       }
@@ -71,31 +115,20 @@ const UserStatsPage = () => {
   // Fetch match history
   const fetchMatchHistory = async () => {
     try {
-      const response = await apiModule.matchAPI.getMatchHistory() as any;
+      const response = await apiModule.matchAPI.getMatchHistory() as { success: boolean; data: UserData[] };
       if (response.success) {
-        setMatchHistory(response.data || []);
+        // Note: matchHistory is not used in current implementation
+        console.log('Match history loaded:', response.data);
       }
     } catch (error) {
       console.error('Error fetching match history:', error);
     }
   };
 
-  // Fetch who likes you (from match API)
-  const fetchWhoLikesYou = async () => {
-    try {
-      const response = await apiModule.matchAPI.getLikes() as any;
-      if (response.success) {
-        setWhoLikesYouData(response.data || []);
-      }
-    } catch (error) {
-      console.error('Error fetching who likes you:', error);
-    }
-  };
-
   // Fetch who has crushed on me (NEW - using our custom endpoint)
   const fetchWhoHasCrushedOnMe = async () => {
     try {
-      const response = await apiModule.authAPI.getWhoHasCrushedOnMe() as any;
+      const response = await apiModule.authAPI.getWhoHasCrushedOnMe() as { success: boolean; data?: { crushers: UserData[] } };
       if (response.success) {
         // Use this data for the "Who Added You as Crush" section
         setWhoLikesYouData(response.data?.crushers || []);
@@ -112,7 +145,7 @@ const UserStatsPage = () => {
       const dashboard = await getDashboard();
       
       // Load individual data sets in parallel
-      const [likes, crushes, matches] = await Promise.all([
+      const [, crushes, matches] = await Promise.all([
         getLikes(),
         getCrushes(), 
         getMatches()
@@ -129,9 +162,6 @@ const UserStatsPage = () => {
         setDashboardData(dashboard);
       }
 
-      if (likes) {
-        setLikesData(likes.likes || []);
-      }
       if (crushes) {
         setCrushesData(crushes.crushes || []);
       }
@@ -150,7 +180,7 @@ const UserStatsPage = () => {
     loadAllData();
   }, [loadAllData]);
 
-  const getAvatarUrl = (user: any) => {
+  const getAvatarUrl = (user: UserData | undefined) => {
     // Handle undefined or null user
     if (!user) {
       return `https://api.dicebear.com/7.x/avataaars/svg?seed=unknown-user`;
@@ -166,7 +196,7 @@ const UserStatsPage = () => {
     return `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(seed)}`;
   };
 
-  const handleViewProfile = (userId: string) => {
+  const handleViewProfile = (userId: string | undefined) => {
     if (userId) {
       router.push(`/find-match?userId=${userId}`);
     }
@@ -205,11 +235,11 @@ const UserStatsPage = () => {
   } satisfies ChartConfig;
 
   const pieData = dashboardData ? [
-    { name: 'Matches', value: dashboardData.stats.totalMatches, color: '#10b981' },
-    { name: 'Likes Given', value: dashboardData.stats.totalLikesGiven, color: '#8b5cf6' },
-    { name: 'Likes Received', value: dashboardData.stats.totalLikesReceived, color: '#ec4899' },
-    { name: 'Profile Views', value: dashboardData.stats.totalProfileViews, color: '#f59e0b' }
-  ].filter(item => item.value > 0) : [];
+    { name: 'Matches', value: dashboardData.stats.totalMatches || 0, color: '#10b981' },
+    { name: 'Likes Given', value: dashboardData.stats.totalLikesGiven || 0, color: '#8b5cf6' },
+    { name: 'Likes Received', value: dashboardData.stats.totalLikesReceived || 0, color: '#ec4899' },
+    { name: 'Profile Views', value: dashboardData.stats.totalProfileViews || 0, color: '#f59e0b' }
+  ].filter(item => (item.value || 0) > 0) : [];
 
   if (loading) {
     return (
@@ -361,7 +391,7 @@ const UserStatsPage = () => {
                   <Star className="h-5 w-5 text-red-600" />
                   Your Crushes ({crushesData.length})
                 </CardTitle>
-                <CardDescription>People you've marked as crushes</CardDescription>
+                <CardDescription>People you&apos;ve marked as crushes</CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
                 {crushesData.length > 0 ? (
@@ -447,7 +477,7 @@ const UserStatsPage = () => {
                           {person.isMatch && (
                             <Badge variant="default" className="text-xs mt-1">
                               <Users className="h-3 w-3 mr-1" />
-                              It's a Match!
+                              It&apos;s a Match!
                             </Badge>
                           )}
                         </div>
@@ -618,7 +648,7 @@ const UserStatsPage = () => {
                           </p>
                         </div>
                         <div className="flex flex-col items-end gap-1">
-                          {room.unreadCount > 0 && (
+                          {(room.unreadCount || 0) > 0 && (
                             <Badge variant="default" className="text-xs">
                               {room.unreadCount}
                             </Badge>
@@ -668,7 +698,7 @@ const UserStatsPage = () => {
                   </div>
                   <div className="text-center p-3 bg-muted rounded-lg">
                     <div className="text-2xl font-bold text-green-600">
-                      {chatRooms.filter(room => room.unreadCount > 0).length}
+                      {chatRooms.filter(room => (room.unreadCount || 0) > 0).length}
                     </div>
                     <div className="text-sm text-muted-foreground">Active Chats</div>
                   </div>
@@ -747,9 +777,9 @@ const UserStatsPage = () => {
                 <div>
                   <div className="flex justify-between mb-2">
                     <span className="text-sm font-medium">Profile Completeness</span>
-                    <span className="text-sm text-muted-foreground">{dashboardData?.insights.profileCompleteness || 0}%</span>
+                    <span className="text-sm text-muted-foreground">{dashboardData?.insights?.profileCompleteness || 0}%</span>
                   </div>
-                  <Progress value={dashboardData?.insights.profileCompleteness || 0} className="h-2" />
+                  <Progress value={dashboardData?.insights?.profileCompleteness || 0} className="h-2" />
                 </div>
               </CardContent>
             </Card>
@@ -760,7 +790,7 @@ const UserStatsPage = () => {
                 <CardDescription>Tips to improve your success</CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
-                {dashboardData?.insights.recommendations.slice(0, 3).map((rec: any, index: number) => (
+                {dashboardData?.insights?.recommendations?.slice(0, 3).map((rec: { title: string; description: string; priority?: 'high' | 'medium' | 'low' }, index: number) => (
                   <div key={index} className="flex items-start gap-3">
                     <Star className={`h-5 w-5 mt-0.5 ${
                       rec.priority === 'high' ? 'text-red-500' : 
@@ -777,7 +807,7 @@ const UserStatsPage = () => {
                     <Star className="h-5 w-5 text-yellow-500 mt-0.5" />
                     <div>
                       <p className="font-medium">Keep it up!</p>
-                      <p className="text-sm text-muted-foreground">You're doing great with your profile</p>
+                      <p className="text-sm text-muted-foreground">You&apos;re doing great with your profile</p>
                     </div>
                   </div>
                 )}

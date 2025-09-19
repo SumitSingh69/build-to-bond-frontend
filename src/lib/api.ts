@@ -469,7 +469,7 @@ export const statsAPI = {
       method: "GET",
     }),
 
-  recordActivity: (activityType: string, data?: any) =>
+  recordActivity: (activityType: string, data?: Record<string, unknown>) =>
     apiRequest("/stats/record-activity", {
       method: "POST",
       body: JSON.stringify({ activityType, data }),

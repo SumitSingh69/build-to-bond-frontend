@@ -1,2 +1,2 @@
-// Re-export the modular EditProfileModal from the Edit folder
-export { default } from "./Edit/EditProfileModal";
+// Re-export the modular EditProfileSheet from the Edit folder
+export { default } from "./Edit/EditProfileSheet";

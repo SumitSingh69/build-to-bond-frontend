@@ -152,14 +152,12 @@ export const UserDetailSheet: React.FC<UserDetailSheetProps> = ({
         );
         setIsCrush(isUserInCrushes);
       } else {
-        // If API returns error but it's just "no crushes found", that's okay
-        console.log("Crushes API response:", response.message);
         setIsCrush(false);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error checking crush status:", error);
-      // If it's a 404 or user not found, just assume no crushes
-      if (error?.message?.includes("User not found") || error?.status === 404) {
+      const apiError = error as { message?: string; status?: number };
+      if (apiError?.message?.includes("User not found") || apiError?.status === 404) {
         console.log("Assuming no crushes due to user not found error");
         setIsCrush(false);
       } else {

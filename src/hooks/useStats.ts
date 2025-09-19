@@ -87,7 +87,12 @@ export const useStats = () => {
     setError(null);
 
     try {
-      const response = await apiModule.statsAPI.getOverview() as ApiResponse<any>;
+      const response = await apiModule.statsAPI.getOverview() as ApiResponse<{
+        totalMatches: number;
+        totalMessages: number;
+        totalLikes: number;
+        profileViews: number;
+      }>;
       
       if (response.success) {
         return response.data;
@@ -111,7 +116,14 @@ export const useStats = () => {
     setError(null);
 
     try {
-      const response = await apiModule.statsAPI.getWeeklyActivity() as ApiResponse<any>;
+      const response = await apiModule.statsAPI.getWeeklyActivity() as ApiResponse<{
+        weeklyStats: Array<{
+          date: string;
+          messages: number;
+          matches: number;
+          likes: number;
+        }>;
+      }>;
       
       if (response.success) {
         return response.data;
@@ -135,7 +147,14 @@ export const useStats = () => {
     setError(null);
 
     try {
-      const response = await apiModule.statsAPI.getMonthlyTrends() as ApiResponse<any>;
+      const response = await apiModule.statsAPI.getMonthlyTrends() as ApiResponse<{
+        monthlyData: Array<{
+          month: string;
+          matches: number;
+          messages: number;
+          likes: number;
+        }>;
+      }>;
       
       if (response.success) {
         return response.data;
@@ -159,7 +178,12 @@ export const useStats = () => {
     setError(null);
 
     try {
-      const response = await apiModule.statsAPI.getInsights() as ApiResponse<any>;
+      const response = await apiModule.statsAPI.getInsights() as ApiResponse<{
+        profileCompleteness: number;
+        strengths: string[];
+        suggestions: string[];
+        activityScore: number;
+      }>;
       
       if (response.success) {
         return response.data;
@@ -183,7 +207,13 @@ export const useStats = () => {
     setError(null);
 
     try {
-      const response = await apiModule.statsAPI.getActivityPattern() as ApiResponse<any>;
+      const response = await apiModule.statsAPI.getActivityPattern() as ApiResponse<{
+        hourlyActivity: Array<{
+          hour: number;
+          activity: number;
+        }>;
+        peakHours: number[];
+      }>;
       
       if (response.success) {
         return response.data;
@@ -202,9 +232,9 @@ export const useStats = () => {
   }, []);
 
   // Record user activity
-  const recordActivity = useCallback(async (activityType: string, data?: any) => {
+  const recordActivity = useCallback(async (activityType: string, data?: Record<string, unknown>) => {
     try {
-      const response = await apiModule.statsAPI.recordActivity(activityType, data) as ApiResponse<any>;
+      const response = await apiModule.statsAPI.recordActivity(activityType, data) as ApiResponse<{ success: boolean }>;
       
       if (response.success) {
         return response.data;
@@ -224,7 +254,7 @@ export const useStats = () => {
     setError(null);
 
     try {
-      const response = await apiModule.statsAPI.triggerAggregation() as ApiResponse<any>;
+      const response = await apiModule.statsAPI.triggerAggregation() as ApiResponse<{ success: boolean; message: string }>;
       
       if (response.success) {
         return response.data;
