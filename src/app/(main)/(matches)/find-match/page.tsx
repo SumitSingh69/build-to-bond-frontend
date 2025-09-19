@@ -22,8 +22,8 @@ import { MatchUser } from "./types";
 const FindMatchPage = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const userIdFromQuery = searchParams.get('userId');
-  
+  const userIdFromQuery = searchParams.get("userId");
+
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [isUserDetailOpen, setIsUserDetailOpen] = useState(false);
@@ -49,7 +49,6 @@ const FindMatchPage = () => {
     return () => window.removeEventListener("resize", updateDimensions);
   }, []);
 
-  // Handle userId from query parameters
   useEffect(() => {
     if (userIdFromQuery) {
       setSelectedUserId(userIdFromQuery);
@@ -95,21 +94,19 @@ const FindMatchPage = () => {
   const handleUserClick = (userId: string) => {
     setSelectedUserId(userId);
     setIsUserDetailOpen(true);
-    
-    // Update URL with userId query parameter for shareable links
+
     const currentUrl = new URL(window.location.href);
-    currentUrl.searchParams.set('userId', userId);
-    window.history.pushState({}, '', currentUrl.toString());
+    currentUrl.searchParams.set("userId", userId);
+    window.history.pushState({}, "", currentUrl.toString());
   };
 
   const handleCloseUserDetail = () => {
     setIsUserDetailOpen(false);
     setSelectedUserId(null);
-    
-    // Clear the userId query parameter when closing the detail sheet
+
     const currentUrl = new URL(window.location.href);
-    currentUrl.searchParams.delete('userId');
-    window.history.pushState({}, '', currentUrl.toString());
+    currentUrl.searchParams.delete("userId");
+    window.history.pushState({}, "", currentUrl.toString());
   };
 
   const handleEnhancedLike = async (userId: string) => {
@@ -170,48 +167,6 @@ const FindMatchPage = () => {
       });
     }
   };
-
-  // const handleSuperLike = async (userId: string) => {
-  //   try {
-  //     clearMatchError();
-  //     const result = await superLikeUser(userId);
-
-  //     if (result?.isMatch) {
-  //       const user =
-  //         matches.find((m) => m._id === userId) ||
-  //         recommendedMatches.find((m) => m._id === userId);
-
-  //       if (user) {
-  //         setMatchedUser(user);
-  //         setIsMatchNotificationOpen(true);
-  //       }
-
-  //       triggerConfetti();
-
-  //       toast.success("🌟 Super Match!", {
-  //         description: "You both super liked each other!",
-  //         duration: 5000,
-  //       });
-  //     } else {
-  //       triggerConfetti();
-
-  //       toast.success("⭐ Super Liked!", {
-  //         description: "Your super like has been sent.",
-  //         duration: 3000,
-  //       });
-  //     }
-
-  //     if (handleLike) {
-  //       handleLike(userId);
-  //     }
-  //   } catch (error) {
-  //     console.error("Failed to super like user:", error);
-  //     toast.error("Failed to super like user", {
-  //       description: "Please try again later.",
-  //       duration: 4000,
-  //     });
-  //   }
-  // };
 
   const handleCloseMatchNotification = () => {
     setIsMatchNotificationOpen(false);
