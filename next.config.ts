@@ -35,7 +35,12 @@ const nextConfig: NextConfig = {
         hostname: 'media.licdn.com',
         port: '',
         pathname: '/**',
-      },
+      },{
+        protocol: 'https',
+        hostname: 'res.cloudinary.com',
+        port: '', 
+        pathname: '/**',
+      }
     ],
     qualities: [75, 90, 100, 95],
     formats: ['image/webp', 'image/avif'],

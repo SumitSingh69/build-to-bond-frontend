@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import Image from "next/image";
 import { Search, MessageCircle } from "lucide-react";
 import { Chat, ChatUser } from "../types";
+import { getAvatarUrl, getUserInitials } from "@/lib/avatar-utils";
 
 interface ChatSidebarProps {
   chats: Chat[];
@@ -106,9 +107,9 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
                 <div className="flex items-center space-x-3">
                   <div className="relative">
                     <div className="w-11 h-11 rounded-full bg-gradient-to-br from-primary-200 to-primary-300 flex items-center justify-center shadow-sm">
-                      {otherUser.profilePicture ? (
+                      {otherUser.profilePicture && otherUser.profilePicture.trim() ? (
                         <Image
-                          src={otherUser.profilePicture}
+                          src={otherUser.profilePicture.trim()}
                           alt={`${otherUser.firstName} ${otherUser.lastName}`}
                           width={44}
                           height={44}
@@ -116,8 +117,7 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
                         />
                       ) : (
                         <span className="font-semibold text-primary-700 text-sm">
-                          {otherUser.firstName[0]}
-                          {otherUser.lastName[0]}
+                          {getUserInitials(otherUser)}
                         </span>
                       )}
                     </div>

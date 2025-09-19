@@ -187,8 +187,16 @@ export const UserDetailSheet: React.FC<UserDetailSheetProps> = ({
       const roomId = await createOrGetChatRoom(user._id);
 
       if (roomId) {
-        router.push(`/chat/${roomId}`);
+        // Close the sheet first
         onClose();
+        // Use router.replace for a clean navigation
+        router.replace(`/chat/${roomId}`);
+        
+        // Show success message
+        toast.success("Starting chat...", {
+          description: `Opening chat with ${user.firstName}`,
+          duration: 2000,
+        });
       } else {
         console.error("No room ID received");
         toast.error("Failed to start chat. Please try again.");
