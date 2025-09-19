@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Confetti from "react-confetti";
 import {
@@ -19,7 +19,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { MatchUser } from "./types";
 
-const FindMatchPage = () => {
+const FindMatchContent = () => {
   const searchParams = useSearchParams();
   const userIdFromQuery = searchParams.get("userId");
 
@@ -356,6 +356,14 @@ const FindMatchPage = () => {
         onKeepSwiping={handleKeepSwiping}
       />
     </div>
+  );
+};
+
+const FindMatchPage = () => {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <FindMatchContent />
+    </Suspense>
   );
 };
 
