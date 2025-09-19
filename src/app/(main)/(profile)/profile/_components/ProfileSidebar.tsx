@@ -79,14 +79,6 @@ export default function ProfileSidebar({
 
   if (!profile) return null;
 
-  const getInitials = (name: string) => {
-    return name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase();
-  };
-
   const capitalizeFirst = (str: string) => {
     return str.charAt(0).toUpperCase() + str.slice(1);
   };

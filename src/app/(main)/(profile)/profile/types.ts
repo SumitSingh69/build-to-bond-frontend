@@ -22,7 +22,7 @@ export interface NotificationItem {
   type: "system" | "crush" | "chat" | "offers";
   title: string;
   message: string;
-  timestamp: Date;
+  timestamp: Date | string; // Allow both Date and string formats
   read: boolean;
   avatar?: string;
 }

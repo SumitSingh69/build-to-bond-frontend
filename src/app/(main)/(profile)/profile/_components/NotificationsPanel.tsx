@@ -2,7 +2,19 @@
 
 import React from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { Bell, Heart, MessageCircle, Gift, Settings } from "lucide-react";
+import { 
+  Bell, 
+  Heart, 
+  MessageCircle, 
+  Gift, 
+  Settings, 
+  Shield, 
+  Trophy, 
+  Camera, 
+  UserCheck,
+  Megaphone,
+  CheckCircle
+} from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -49,6 +61,38 @@ export default function NotificationsPanel({
     }
   };
 
+  const getSystemNotificationIcon = (notification: NotificationItem) => {
+    if (notification.type !== "system") {
+      return getTabIcon(notification.type);
+    }
+
+    // Determine icon based on system notification content
+    const title = notification.title.toLowerCase();
+    const message = notification.message.toLowerCase();
+
+    if (title.includes("welcome") || message.includes("welcome")) {
+      return <UserCheck className="w-4 h-4 text-green-600" />;
+    }
+    if (title.includes("password") || message.includes("password") || title.includes("security")) {
+      return <Shield className="w-4 h-4 text-blue-600" />;
+    }
+    if (title.includes("profile") && (title.includes("complete") || title.includes("progress"))) {
+      return <Trophy className="w-4 h-4 text-yellow-600" />;
+    }
+    if (title.includes("picture") || title.includes("photo") || message.includes("picture")) {
+      return <Camera className="w-4 h-4 text-purple-600" />;
+    }
+    if (title.includes("announcement") || message.includes("announcement")) {
+      return <Megaphone className="w-4 h-4 text-red-600" />;
+    }
+    if (title.includes("success") || message.includes("successfully")) {
+      return <CheckCircle className="w-4 h-4 text-green-600" />;
+    }
+    
+    // Default system icon
+    return <Settings className="w-4 h-4 text-gray-600" />;
+  };
+
   const filterNotificationsByType = (type: NotificationTab) => {
     return notifications.filter((notification) => notification.type === type);
   };
@@ -57,22 +101,35 @@ export default function NotificationsPanel({
     return filterNotificationsByType(type).filter((n) => !n.read).length;
   };
 
-  const formatTimestamp = (timestamp: Date) => {
-    const now = new Date();
-    const diff = now.getTime() - timestamp.getTime();
-    const minutes = Math.floor(diff / (1000 * 60));
-    const hours = Math.floor(diff / (1000 * 60 * 60));
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  const formatTimestamp = (timestamp: Date | string) => {
+    try {
+      // Handle cases where timestamp might be a string or invalid
+      const date = timestamp instanceof Date ? timestamp : new Date(timestamp);
+      
+      // Check if the date is valid
+      if (isNaN(date.getTime())) {
+        return "unknown";
+      }
 
-    if (minutes < 1) return "now";
-    if (minutes < 60) return `${minutes}m ago`;
-    if (hours < 24) return `${hours}h ago`;
-    if (days < 7) return `${days}d ago`;
+      const now = new Date();
+      const diff = now.getTime() - date.getTime();
+      const minutes = Math.floor(diff / (1000 * 60));
+      const hours = Math.floor(diff / (1000 * 60 * 60));
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
 
-    return new Intl.DateTimeFormat("en-US", {
-      month: "short",
-      day: "numeric",
-    }).format(timestamp);
+      if (minutes < 1) return "now";
+      if (minutes < 60) return `${minutes}m ago`;
+      if (hours < 24) return `${hours}h ago`;
+      if (days < 7) return `${days}d ago`;
+
+      return new Intl.DateTimeFormat("en-US", {
+        month: "short",
+        day: "numeric",
+      }).format(date);
+    } catch (error) {
+      console.error("Error formatting timestamp:", error, timestamp);
+      return "unknown";
+    }
   };
 
   const NotificationCard = ({
@@ -97,21 +154,33 @@ export default function NotificationsPanel({
     >
       <CardContent>
         <div className="flex items-start space-x-2">
-          <Avatar className="w-8 h-8 flex-shrink-0">
+          <Avatar className={`w-8 h-8 flex-shrink-0 ${
+            notification.type === "system" 
+              ? "bg-gradient-to-br from-blue-100 to-blue-200" 
+              : "bg-gradient-to-br from-primary-200 to-primary-300"
+          }`}>
             <AvatarImage src={notification.avatar} alt="" />
-            <AvatarFallback className="bg-gradient-to-br from-primary-200 to-primary-300 text-xs">
-              {getTabIcon(notification.type)}
+            <AvatarFallback className={`text-xs ${
+              notification.type === "system" 
+                ? "bg-gradient-to-br from-blue-100 to-blue-200" 
+                : "bg-gradient-to-br from-primary-200 to-primary-300"
+            }`}>
+              {getSystemNotificationIcon(notification)}
             </AvatarFallback>
           </Avatar>
 
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between mb-1">
-              <h4 className="text-xs font-semibold text-gray-800 truncate">
+              <h4 className={`text-xs font-semibold truncate ${
+                notification.type === "system" ? "text-blue-800" : "text-gray-800"
+              }`}>
                 {notification.title}
               </h4>
               <div className="flex items-center space-x-1">
                 {!notification.read && (
-                  <div className="w-1.5 h-1.5 bg-primary-500 rounded-full flex-shrink-0"></div>
+                  <div className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${
+                    notification.type === "system" ? "bg-blue-500" : "bg-primary-500"
+                  }`}></div>
                 )}
                 <span className="text-[10px] text-gray-500 flex-shrink-0">
                   {formatTimestamp(notification.timestamp)}

@@ -20,71 +20,18 @@ import { useAuth } from "@/context/AuthContext";
 import { User } from "@/types/auth.types";
 import { apiRequest } from "@/lib/api";
 import apiModule from "@/lib/api";
+import { useNotifications } from "@/hooks/useNotifications";
 import { toast } from "sonner";
 import { handleProfileUpdateFlow } from "@/lib/profile-utils";
-
-const mockNotifications: NotificationItem[] = [
-  {
-    id: "1",
-    type: "system",
-    title: "Profile Updated",
-    message: "Your profile has been successfully updated with new information.",
-    timestamp: new Date(Date.now() - 1000 * 60 * 30),
-    read: false,
-    avatar: undefined,
-  },
-  {
-    id: "2",
-    type: "crush",
-    title: "New Crush!",
-    message: "Someone has a crush on you! Check out who it might be.",
-    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2),
-    read: false,
-    avatar: "/public/assets/candid.jpg",
-  },
-  {
-    id: "3",
-    type: "chat",
-    title: "New Message",
-    message: "You have a new message from Sarah Chen.",
-    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 6),
-    read: true,
-    avatar: "/public/assets/candid.jpg",
-  },
-  {
-    id: "4",
-    type: "offers",
-    title: "Premium Upgrade",
-    message:
-      "Upgrade to Premium and get unlimited swipes for just $9.99/month.",
-    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24),
-    read: true,
-    avatar: undefined,
-  },
-  {
-    id: "5",
-    type: "system",
-    title: "Security Alert",
-    message: "Your account was accessed from a new device. Was this you?",
-    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24 * 2),
-    read: true,
-    avatar: undefined,
-  },
-  {
-    id: "6",
-    type: "crush",
-    title: "Mutual Match!",
-    message: "You and Jessica Smith are now a mutual match! Start chatting.",
-    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24 * 3),
-    read: false,
-    avatar: "/public/assets/candid.jpg",
-  },
-];
+//import SystemAnnouncementTest from "./_components/SystemAnnouncementTest";
 
 function ProfilePageContent() {
   const { user, updateProfile: updateAuthProfile, loading } = useAuth();
-  const [notifications, setNotifications] =
-    useState<NotificationItem[]>(mockNotifications);
+  const {
+    notifications,
+    markAsRead,
+  } = useNotifications({ autoRefresh: true });
+  
   const [isLoading, setIsLoading] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [dataLoaded, setDataLoaded] = useState(false);
@@ -149,13 +96,39 @@ function ProfilePageContent() {
 
     setIsLoading(true);
     try {
+      // Clean up social links - remove empty strings
+      const cleanedSocialLinks = updatedData.socialLinks ? {
+        ...Object.fromEntries(
+          Object.entries(updatedData.socialLinks).filter(([, value]) => 
+            value && typeof value === 'string' && value.trim() !== ""
+          )
+        )
+      } : undefined;
+
+      // Clean up location - remove empty strings but preserve non-string values
+      const cleanedLocation = updatedData.location ? {
+        ...Object.fromEntries(
+          Object.entries(updatedData.location).filter(([, value]) => {
+            if (typeof value === 'string') {
+              return value.trim() !== "";
+            }
+            return value !== null && value !== undefined;
+          })
+        )
+      } : undefined;
+
       const updatePayload: Partial<User> = {
         ...updatedData,
+        socialLinks: cleanedSocialLinks,
+        location: cleanedLocation,
         matches: undefined,
         likes: undefined,
         crushes: undefined,
         passedBy: undefined,
       };
+
+      // Debug log to see the cleaned payload
+      console.log("Cleaned payload:", JSON.stringify(updatePayload, null, 2));
 
       let response: {
         success: boolean;
@@ -212,9 +185,15 @@ function ProfilePageContent() {
       );
     } catch (error) {
       console.error("Profile update error:", error);
-      toast.error(
-        error instanceof Error ? error.message : "Failed to update profile"
-      );
+      
+      // Handle validation errors specifically
+      if (error instanceof Error && error.message.includes("Invalid profile data")) {
+        toast.error("Please check your profile data - some fields may contain invalid information. Make sure social media URLs are valid or leave them empty.");
+      } else {
+        toast.error(
+          error instanceof Error ? error.message : "Failed to update profile"
+        );
+      }
     } finally {
       setIsLoading(false);
     }
@@ -296,14 +275,13 @@ function ProfilePageContent() {
     console.log("Notification clicked:", notification);
   };
 
-  const handleMarkAsRead = (notificationId: string) => {
-    setNotifications((prev) =>
-      prev.map((notification) =>
-        notification.id === notificationId
-          ? { ...notification, read: true }
-          : notification
-      )
-    );
+  const handleMarkAsRead = async (notificationId: string) => {
+    try {
+      await markAsRead(notificationId);
+    } catch (error) {
+      console.error("Failed to mark notification as read:", error);
+      toast.error("Failed to mark notification as read");
+    }
   };
 
   if (loading || !user || !dataLoaded) {
@@ -392,6 +370,13 @@ function ProfilePageContent() {
           onMarkAsRead={handleMarkAsRead}
         />
       </ClientOnly>
+
+      {/* Development tool for testing system notifications */}
+      {process.env.NODE_ENV === 'development' && (
+        <div className="fixed top-4 left-4 z-50">
+          {/* <SystemAnnouncementTest onRefreshNotifications={refreshNotifications} /> */}
+        </div>
+      )}
 
       {user && (
         <EditProfileSheet

@@ -4,16 +4,12 @@ import React, { useState, useEffect } from "react";
 import {
   Sheet,
   SheetContent,
-  SheetDescription,
-  SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { User } from "@/types/auth.types";
 import { Save, ChevronLeft } from "lucide-react";
 import { toast } from "sonner";
-import ProfilePictureUpload from "@/components/ProfilePictureUpload";
-import { ScrollArea } from "@/components/ui/scroll-area";
 
 import BasicInformationSection from "./BasicInformationSection";
 import DatingPreferencesSection from "./DatingPreferencesSection";

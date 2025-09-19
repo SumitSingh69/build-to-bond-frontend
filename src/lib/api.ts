@@ -513,5 +513,70 @@ export const chatAPI = {
     }),
 };
 
-const apiModule = { apiRequest, authAPI, matchAPI, statsAPI, chatAPI };
+export const notificationAPI = {
+  getNotifications: (options: {
+    type?: string;
+    page?: number;
+    limit?: number;
+    unreadOnly?: boolean;
+  } = {}) => {
+    const { type, page = 1, limit = 20, unreadOnly = false } = options;
+    const params = new URLSearchParams({
+      page: page.toString(),
+      limit: limit.toString(),
+      unreadOnly: unreadOnly.toString(),
+    });
+    
+    if (type) params.append('type', type);
+    
+    return apiRequest(`/notifications?${params.toString()}`, {
+      method: "GET",
+    });
+  },
+
+  getUnreadCounts: () =>
+    apiRequest("/notifications/unread-counts", {
+      method: "GET",
+    }),
+
+  markAsRead: (notificationId: string) =>
+    apiRequest(`/notifications/${notificationId}/read`, {
+      method: "PUT",
+    }),
+
+  markAllAsRead: (type?: string) =>
+    apiRequest("/notifications/mark-all-read", {
+      method: "PUT",
+      body: JSON.stringify({ type }),
+    }),
+
+  deleteNotification: (notificationId: string) =>
+    apiRequest(`/notifications/${notificationId}`, {
+      method: "DELETE",
+    }),
+
+  // Admin functions for system announcements
+  sendAnnouncementToAll: (announcement: {
+    title: string;
+    message: string;
+    expiresIn?: number;
+  }) =>
+    apiRequest("/users/admin/system-announcement/all", {
+      method: "POST",
+      body: JSON.stringify(announcement),
+    }),
+
+  sendAnnouncementToUsers: (announcement: {
+    title: string;
+    message: string;
+    userIds: string[];
+    expiresIn?: number;
+  }) =>
+    apiRequest("/users/admin/system-announcement/users", {
+      method: "POST",
+      body: JSON.stringify(announcement),
+    }),
+};
+
+const apiModule = { apiRequest, authAPI, matchAPI, statsAPI, chatAPI, notificationAPI };
 export default apiModule;

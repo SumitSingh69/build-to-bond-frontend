@@ -1,5 +1,4 @@
 import type { NextConfig } from "next";
-import { protocol } from "socket.io-client";
 
 const nextConfig: NextConfig = {
   // Enforce linting and type-checking during builds
