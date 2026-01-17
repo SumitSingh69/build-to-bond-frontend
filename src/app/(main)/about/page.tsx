@@ -8,6 +8,23 @@ const AboutUsPage = () => {
   const developers = [
     {
       id: 1,
+      name: "Deepak Melkani",
+      role: "Full Stack Developer",
+      image: "/assets/deepakTq.png",
+      description:
+        "Expert in node.js and React, creating seamless user experiences and matching algorithms.",
+      socialLinks: [
+        { platform: "github" as const, url: "https://github.com/Deepak-Melkani" },
+        {
+          platform: "linkedin" as const,
+          url: "https://www.linkedin.com/in/deepakmelkani/",
+        },
+        { platform: "twitter" as const, url: "https://x.com/Deepak19138166" },
+        { platform: "portfolio" as const, url: "https://www.linkedin.com/in/deepakmelkani/" },
+      ],
+    },
+    {
+      id: 2,
       name: "Satrasala Hari priya",
       role: "Lead Frontend Developer",
       image: "/assets/hari-priya.png",
@@ -24,7 +41,7 @@ const AboutUsPage = () => {
       ],
     },
     {
-      id: 2,
+      id: 3,
       name: "Sumit Singh Bora",
       role: "Backend Engineer & API Architect",
       image: "/assets/sumit.jpg",
@@ -41,7 +58,7 @@ const AboutUsPage = () => {
       ],
     },
     {
-      id: 3,
+      id: 4,
       name: "Mukesh Singh Rawat",
       role: "UX/UI Designer",
       image: "/assets/mukesh-bhai.png",
@@ -64,7 +81,7 @@ const AboutUsPage = () => {
       ],
     },
     {
-      id: 4,
+      id: 5,
       name: "Pawan Dasila",
       role: "Full Stack Developer & WebSocket Engineer",
       image: "/assets/pawan-bhai.png",
@@ -91,7 +108,7 @@ const AboutUsPage = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Hero Section */}
+      {/* Hero Section */}  
       <section className="bg-primary-50 py-20 px-4">
         <div className="max-w-4xl mx-auto text-center">
           <h1 className="text-5xl font-bold text-primary-900 mb-6 font-playfair">
@@ -368,7 +385,7 @@ const AboutUsPage = () => {
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-8 lg:gap-10 place-items-center">
-            {developers.map((developer) => (
+            {developers.map((developer) => (  
               <DeveloperCard key={developer.id} developer={developer} />
             ))}
           </div>
